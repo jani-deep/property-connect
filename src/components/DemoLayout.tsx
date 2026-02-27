@@ -27,21 +27,21 @@ const DemoLayout = ({ title, subtitle, icon, children, onLogout }: DemoLayoutPro
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-        <div className="container mx-auto flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4">
+        <div className="container mx-auto flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <Link
               to="/"
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span className="text-sm">Back to Hub</span>
+              <span className="text-sm hidden sm:inline">Back to Hub</span>
             </Link>
-            <div className="h-6 w-px bg-border" />
-            <div className="flex items-center gap-3">
-              {icon}
-              <div>
-                <h1 className="text-lg font-semibold text-foreground">{title}</h1>
-                <p className="text-xs text-muted-foreground">{subtitle}</p>
+            <div className="h-6 w-px bg-border hidden sm:block" />
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <span className="flex-shrink-0">{icon}</span>
+              <div className="min-w-0">
+                <h1 className="text-sm sm:text-lg font-semibold text-foreground truncate">{title}</h1>
+                <p className="text-xs text-muted-foreground hidden sm:block">{subtitle}</p>
               </div>
             </div>
           </div>

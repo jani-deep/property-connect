@@ -128,7 +128,7 @@ const LawEnforcement = ({ onLogout }: { onLogout?: () => void }) => {
       icon={<Search className="w-5 h-5 text-primary" />}
       onLogout={onLogout}
     >
-      <div className="container mx-auto px-6 py-10 max-w-4xl">
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-10 max-w-4xl">
         <AnimatePresence mode="wait">
           {/* HOME with search history */}
           {step === "home" && (
@@ -230,21 +230,21 @@ const LawEnforcement = ({ onLogout }: { onLogout?: () => void }) => {
                     onClick={() => { setSelectedMatch(i); setStep("detail"); }}
                     className="w-full glass-card p-5 text-left hover:border-primary/40 transition-all"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                         <img src={m.img} alt="" className="w-full h-full object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3 mb-1">
-                          <span className={`text-2xl font-bold font-mono ${getConfidenceColor(m.confidence)}`}>{m.confidence}%</span>
-                          <span className="text-sm text-foreground font-medium">{m.confidence >= 90 ? "Strong Match" : m.confidence >= 50 ? "Possible Match" : "Low Confidence"}</span>
+                        <div className="flex items-center gap-2 sm:gap-3 mb-1">
+                          <span className={`text-xl sm:text-2xl font-bold font-mono ${getConfidenceColor(m.confidence)}`}>{m.confidence}%</span>
+                          <span className="text-xs sm:text-sm text-foreground font-medium">{m.confidence >= 90 ? "Strong Match" : m.confidence >= 50 ? "Possible Match" : "Low Confidence"}</span>
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground flex-wrap">
                           <span className="flex items-center gap-1"><User className="w-3 h-3" />{m.owner}</span>
                           <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{m.county}</span>
                         </div>
                       </div>
-                      <div className="flex-shrink-0">
+                      <div className="flex-shrink-0 hidden sm:block">
                         {m.stolen ? (
                           <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-destructive/10 text-destructive text-xs font-semibold">
                             <AlertTriangle className="w-3 h-3" /> Stolen
