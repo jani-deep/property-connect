@@ -1,14 +1,26 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Fingerprint, Camera, Check, Sparkles, X } from "lucide-react";
+import { Fingerprint, Camera, Check, Sparkles, X, Plus, Package, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
 import DemoLayout from "@/components/DemoLayout";
 import demoWatch from "@/assets/demo-watch.jpg";
 import demoLaptop from "@/assets/demo-laptop.jpg";
 import demoCamera from "@/assets/demo-camera.jpg";
+import demoCar from "@/assets/demo-car.jpg";
 
-type Step = "capture" | "analyzing" | "results" | "dna-select" | "dna-place";
+type View = "listing" | "capture" | "analyzing" | "results" | "dna-select" | "dna-place";
 
-const items = [
+const allAssets = [
+  {
+    img: demoCar,
+    brand: "BMW",
+    model: "5 Series 530i xDrive",
+    category: "Vehicle – Sedan",
+    serial: "WBA53BJ09RWC18294",
+    value: "$56,200",
+    registered: true,
+    dnaPlaced: true,
+    images: [demoCar],
+  },
   {
     img: demoWatch,
     brand: "Rolex",
@@ -16,6 +28,9 @@ const items = [
     category: "Luxury Watch",
     serial: "M7X9K2R4",
     value: "$14,500",
+    registered: true,
+    dnaPlaced: true,
+    images: [demoWatch],
   },
   {
     img: demoLaptop,
@@ -24,6 +39,9 @@ const items = [
     category: "Electronics – Laptop",
     serial: "C02ZN1LPMD6T",
     value: "$3,499",
+    registered: true,
+    dnaPlaced: false,
+    images: [demoLaptop],
   },
   {
     img: demoCamera,
@@ -32,28 +50,32 @@ const items = [
     category: "Electronics – Camera",
     serial: "032024005891",
     value: "$4,299",
+    registered: false,
+    dnaPlaced: false,
+    images: [demoCamera],
   },
 ];
 
 const PropertyProof = () => {
-  const [step, setStep] = useState<Step>("capture");
+  const [view, setView] = useState<View>("listing");
   const [selectedItem, setSelectedItem] = useState(0);
   const [dnaPin] = useState("FL-DNA-7829-AX");
   const [markerPos, setMarkerPos] = useState<{ x: number; y: number } | null>(null);
   const [markerActive, setMarkerActive] = useState(false);
   const [analyzeProgress, setAnalyzeProgress] = useState(0);
+  const [rotationAngle, setRotationAngle] = useState(0);
 
-  const item = items[selectedItem];
+  const item = allAssets[selectedItem];
 
   const startAnalysis = (idx: number) => {
     setSelectedItem(idx);
-    setStep("analyzing");
+    setView("analyzing");
     setAnalyzeProgress(0);
     const interval = setInterval(() => {
       setAnalyzeProgress((p) => {
         if (p >= 100) {
           clearInterval(interval);
-          setTimeout(() => setStep("results"), 300);
+          setTimeout(() => setView("results"), 300);
           return 100;
         }
         return p + 4;
@@ -62,11 +84,15 @@ const PropertyProof = () => {
   };
 
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (step !== "dna-place") return;
+    if (view !== "dna-place") return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     setMarkerPos({ x, y });
+  };
+
+  const rotate = (dir: number) => {
+    setRotationAngle((a) => a + dir * 45);
   };
 
   return (
@@ -76,31 +102,72 @@ const PropertyProof = () => {
       icon={<Fingerprint className="w-5 h-5 text-primary" />}
     >
       <div className="container mx-auto px-6 py-10 max-w-4xl">
-        {/* Step indicator */}
-        <div className="flex items-center justify-center gap-2 mb-10">
-          {["Capture", "AI Analysis", "Confirm", "DNA PIN", "Place Marker"].map((label, i) => {
-            const steps: Step[] = ["capture", "analyzing", "results", "dna-select", "dna-place"];
-            const isActive = steps.indexOf(step) >= i;
-            return (
-              <div key={label} className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${isActive ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-                  {i + 1}
-                </div>
-                <span className={`text-xs hidden sm:inline ${isActive ? "text-foreground" : "text-muted-foreground"}`}>{label}</span>
-                {i < 4 && <div className={`w-6 h-px ${isActive ? "bg-primary" : "bg-border"}`} />}
-              </div>
-            );
-          })}
-        </div>
-
         <AnimatePresence mode="wait">
-          {/* STEP 1: Capture */}
-          {step === "capture" && (
+          {/* LISTING VIEW */}
+          {view === "listing" && (
+            <motion.div key="listing" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-foreground">My Assets</h2>
+                  <p className="text-sm text-muted-foreground">{allAssets.length} items registered</p>
+                </div>
+                <button
+                  onClick={() => setView("capture")}
+                  className="px-4 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add New Asset
+                </button>
+              </div>
+              <div className="space-y-3">
+                {allAssets.map((asset, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.08 }}
+                    className="glass-card p-4 flex items-center gap-4 hover:border-primary/30 transition-all cursor-pointer"
+                    onClick={() => { setSelectedItem(i); setView("dna-select"); }}
+                  >
+                    <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                      <img src={asset.img} alt={asset.model} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-semibold text-foreground">{asset.brand} {asset.model}</div>
+                      <div className="text-xs text-muted-foreground">{asset.category} • Serial: <span className="font-mono">{asset.serial}</span></div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {asset.dnaPlaced ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-success/10 text-success text-xs font-medium">
+                          <Fingerprint className="w-3 h-3" /> DNA Placed
+                        </span>
+                      ) : asset.registered ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-warning/10 text-warning text-xs font-medium">
+                          <Package className="w-3 h-3" /> Registered
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs">
+                          Pending
+                        </span>
+                      )}
+                      <span className="text-sm font-semibold text-foreground">{asset.value}</span>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* CAPTURE / ADD NEW */}
+          {view === "capture" && (
             <motion.div key="capture" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-              <h2 className="text-2xl font-bold text-foreground mb-2 text-center">Photograph Your Item</h2>
+              <button onClick={() => setView("listing")} className="text-sm text-muted-foreground hover:text-foreground mb-6 inline-flex items-center gap-1">
+                <ChevronLeft className="w-4 h-4" /> Back to Assets
+              </button>
+              <h2 className="text-2xl font-bold text-foreground mb-2 text-center">Add New Asset</h2>
               <p className="text-muted-foreground text-center mb-8">Select an item to see AI analysis in action</p>
-              <div className="grid grid-cols-3 gap-4">
-                {items.map((it, i) => (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {allAssets.map((it, i) => (
                   <button
                     key={i}
                     onClick={() => startAnalysis(i)}
@@ -109,8 +176,9 @@ const PropertyProof = () => {
                     <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-muted">
                       <img src={it.img} alt={it.model} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Camera className="w-4 h-4 text-primary" />
+                    <div className="text-xs font-medium text-foreground truncate">{it.brand} {it.model}</div>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                      <Camera className="w-3 h-3 text-primary" />
                       Tap to scan
                     </div>
                   </button>
@@ -119,8 +187,8 @@ const PropertyProof = () => {
             </motion.div>
           )}
 
-          {/* STEP 2: Analyzing */}
-          {step === "analyzing" && (
+          {/* ANALYZING */}
+          {view === "analyzing" && (
             <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center">
               <div className="glass-card p-8 max-w-md mx-auto">
                 <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
@@ -149,8 +217,8 @@ const PropertyProof = () => {
             </motion.div>
           )}
 
-          {/* STEP 3: Results */}
-          {step === "results" && (
+          {/* RESULTS */}
+          {view === "results" && (
             <motion.div key="results" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
               <div className="glass-card p-8 max-w-lg mx-auto">
                 <div className="flex items-center gap-2 text-success mb-4">
@@ -177,10 +245,10 @@ const PropertyProof = () => {
                   </div>
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={() => setStep("dna-select")} className="flex-1 px-4 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors">
+                  <button onClick={() => setView("dna-select")} className="flex-1 px-4 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors">
                     Confirm & Add DNA PIN
                   </button>
-                  <button onClick={() => setStep("capture")} className="px-4 py-3 rounded-lg bg-muted text-muted-foreground text-sm hover:bg-muted/80 transition-colors">
+                  <button onClick={() => setView("capture")} className="px-4 py-3 rounded-lg bg-muted text-muted-foreground text-sm hover:bg-muted/80 transition-colors">
                     Retake
                   </button>
                 </div>
@@ -188,9 +256,12 @@ const PropertyProof = () => {
             </motion.div>
           )}
 
-          {/* STEP 4: DNA PIN */}
-          {step === "dna-select" && (
+          {/* DNA PIN */}
+          {view === "dna-select" && (
             <motion.div key="dna-select" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+              <button onClick={() => setView("listing")} className="text-sm text-muted-foreground hover:text-foreground mb-6 inline-flex items-center gap-1">
+                <ChevronLeft className="w-4 h-4" /> Back to Assets
+              </button>
               <div className="glass-card p-8 max-w-md mx-auto text-center">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-accent/10 flex items-center justify-center">
                   <Fingerprint className="w-8 h-8 text-accent" />
@@ -200,23 +271,43 @@ const PropertyProof = () => {
                 <div className="px-6 py-4 rounded-lg bg-muted font-mono text-xl font-bold text-accent mb-6 tracking-wider">
                   {dnaPin}
                 </div>
-                <button onClick={() => setStep("dna-place")} className="w-full px-4 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors">
+                <button onClick={() => { setMarkerPos(null); setRotationAngle(0); setView("dna-place"); }} className="w-full px-4 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors">
                   Place DNA Marker on Item
                 </button>
               </div>
             </motion.div>
           )}
 
-          {/* STEP 5: DNA Placement */}
-          {step === "dna-place" && (
+          {/* DNA PLACEMENT with 360 rotation */}
+          {view === "dna-place" && (
             <motion.div key="dna-place" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+              <button onClick={() => setView("dna-select")} className="text-sm text-muted-foreground hover:text-foreground mb-4 inline-flex items-center gap-1">
+                <ChevronLeft className="w-4 h-4" /> Back
+              </button>
               <h3 className="text-lg font-semibold text-foreground mb-2 text-center">Tap Where You Applied the DNA Adhesive</h3>
-              <p className="text-sm text-muted-foreground text-center mb-6">Tap on the image to mark the exact placement location</p>
+              <p className="text-sm text-muted-foreground text-center mb-4">Rotate the image to find the right angle, then tap to mark placement</p>
+
+              {/* Rotation Controls */}
+              <div className="flex items-center justify-center gap-4 mb-4">
+                <button onClick={() => rotate(-1)} className="p-2 rounded-lg bg-muted hover:bg-muted/80 text-foreground transition-colors">
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+                <span className="text-xs text-muted-foreground font-mono">{rotationAngle}° rotation</span>
+                <button onClick={() => rotate(1)} className="p-2 rounded-lg bg-muted hover:bg-muted/80 text-foreground transition-colors">
+                  <RotateCcw className="w-4 h-4 -scale-x-100" />
+                </button>
+              </div>
+
               <div
                 className="relative max-w-lg mx-auto rounded-xl overflow-hidden cursor-crosshair border-2 border-border"
                 onClick={handleImageClick}
               >
-                <img src={item.img} alt={item.model} className="w-full" />
+                <img
+                  src={item.img}
+                  alt={item.model}
+                  className="w-full transition-transform duration-500"
+                  style={{ transform: `rotate(${rotationAngle}deg) scale(${rotationAngle % 90 !== 0 ? 1.2 : 1})` }}
+                />
                 {markerPos && (
                   <div
                     className={`dna-marker ${markerActive ? "active" : ""}`}
@@ -239,7 +330,7 @@ const PropertyProof = () => {
                   </p>
                   <button
                     onClick={() => {
-                      setStep("capture");
+                      setView("listing");
                       setMarkerPos(null);
                     }}
                     className="px-6 py-3 rounded-lg bg-success text-success-foreground font-semibold text-sm hover:bg-success/90 transition-colors"
