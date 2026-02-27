@@ -7,7 +7,7 @@ import demoLaptop from "@/assets/demo-laptop.jpg";
 import demoCamera from "@/assets/demo-camera.jpg";
 import demoCar from "@/assets/demo-car.jpg";
 
-type Step = "home" | "searching" | "results" | "detail";
+type Step = "home" | "captured" | "searching" | "results" | "detail";
 
 const searchHistory = [
   { img: demoCar, label: "BMW 5 Series – Sedan", date: "Today, 2:15 PM" },
@@ -33,11 +33,21 @@ const LawEnforcement = ({ onLogout }: { onLogout?: () => void }) => {
   const [markerActive, setMarkerActive] = useState(false);
   const [searchProgress, setSearchProgress] = useState(0);
   const [matches, setMatches] = useState(defaultMatches);
+  const [searchImage, setSearchImage] = useState(demoWatch);
+  const [searchLabel, setSearchLabel] = useState("Rolex Submariner – Watch");
+  const [useCarMatchesFlag, setUseCarMatchesFlag] = useState(false);
 
-  const startSearch = (useCarMatches = false) => {
+  const handleCapture = (img: string, label: string, isCarMatch: boolean) => {
+    setSearchImage(img);
+    setSearchLabel(label);
+    setUseCarMatchesFlag(isCarMatch);
+    setStep("captured");
+  };
+
+  const startSearch = () => {
     setStep("searching");
     setSearchProgress(0);
-    setMatches(useCarMatches ? carMatches : defaultMatches);
+    setMatches(useCarMatchesFlag ? carMatches : defaultMatches);
     const interval = setInterval(() => {
       setSearchProgress((p) => {
         if (p >= 100) { clearInterval(interval); setTimeout(() => setStep("results"), 400); return 100; }
@@ -64,7 +74,7 @@ const LawEnforcement = ({ onLogout }: { onLogout?: () => void }) => {
                 </div>
                 <h2 className="text-lg font-bold text-foreground mb-1">Scan Recovered Item</h2>
                 <p className="text-xs text-muted-foreground mb-5">Photograph recovered property to search the registered owner database</p>
-                <button onClick={() => startSearch(false)} className="w-full px-4 py-3.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
+                <button onClick={() => handleCapture(demoWatch, "Rolex Submariner – Watch", false)} className="w-full px-4 py-3.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
                   <Camera className="w-4 h-4" />
                   Capture & Search
                 </button>
@@ -81,7 +91,7 @@ const LawEnforcement = ({ onLogout }: { onLogout?: () => void }) => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 + i * 0.06 }}
-                    onClick={() => startSearch(i === 0)}
+                    onClick={() => handleCapture(h.img, h.label, i === 0)}
                     className="w-full glass-card p-3 flex items-center gap-3 active:scale-[0.98] transition-transform text-left"
                   >
                     <div className="w-10 h-10 rounded-lg overflow-hidden bg-muted flex-shrink-0">
@@ -94,6 +104,41 @@ const LawEnforcement = ({ onLogout }: { onLogout?: () => void }) => {
                     <Search className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
                   </motion.button>
                 ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* CAPTURED PREVIEW */}
+          {step === "captured" && (
+            <motion.div key="captured" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+              <button onClick={() => setStep("home")} className="text-xs text-muted-foreground hover:text-foreground mb-4 inline-flex items-center gap-1">
+                ← Retake Photo
+              </button>
+              <div className="glass-card p-4">
+                <div className="flex items-center gap-2 text-primary mb-3">
+                  <Camera className="w-4 h-4" />
+                  <span className="text-xs font-semibold">Image Captured</span>
+                </div>
+                <div className="rounded-xl overflow-hidden border-2 border-border bg-muted mb-4">
+                  <img src={searchImage} alt={searchLabel} className="w-full" />
+                </div>
+                <div className="flex items-center gap-3 mb-4 px-1">
+                  <div className="w-10 h-10 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-border">
+                    <img src={searchImage} alt="" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-semibold text-foreground truncate">{searchLabel}</div>
+                    <div className="text-[10px] text-muted-foreground">Ready for database search</div>
+                  </div>
+                  <Check className="w-4 h-4 text-success flex-shrink-0" />
+                </div>
+                <button
+                  onClick={() => startSearch()}
+                  className="w-full px-4 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-xs hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Search className="w-4 h-4" />
+                  Search Database
+                </button>
               </div>
             </motion.div>
           )}

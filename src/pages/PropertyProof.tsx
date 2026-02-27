@@ -20,7 +20,7 @@ import demoPhoneSide from "@/assets/demo-phone-side.jpg";
 import demoPhoneBack from "@/assets/demo-phone-back.jpg";
 import demoKeys from "@/assets/demo-keys.jpg";
 
-type View = "listing" | "capture" | "analyzing" | "results" | "dna-select" | "dna-place";
+type View = "listing" | "capture" | "captured" | "analyzing" | "results" | "dna-select" | "dna-place";
 
 const allAssets = [
   {
@@ -101,8 +101,12 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
 
   const item = allAssets[selectedItem];
 
-  const startAnalysis = (idx: number) => {
+  const handleCapture = (idx: number) => {
     setSelectedItem(idx);
+    setView("captured");
+  };
+
+  const startAnalysis = () => {
     setView("analyzing");
     setAnalyzeProgress(0);
     const interval = setInterval(() => {
@@ -200,7 +204,7 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
                 {allAssets.map((it, i) => (
                   <button
                     key={i}
-                    onClick={() => startAnalysis(i)}
+                    onClick={() => handleCapture(i)}
                     className="glass-card p-3 active:scale-[0.98] transition-transform text-left"
                   >
                     <div className="aspect-square rounded-lg overflow-hidden mb-2 bg-muted border border-border">
@@ -213,6 +217,41 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
                     </div>
                   </button>
                 ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* CAPTURED PREVIEW */}
+          {view === "captured" && (
+            <motion.div key="captured" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+              <button onClick={() => setView("capture")} className="text-xs text-muted-foreground hover:text-foreground mb-4 inline-flex items-center gap-1">
+                <ChevronLeft className="w-3.5 h-3.5" /> Retake Photo
+              </button>
+              <div className="glass-card p-4">
+                <div className="flex items-center gap-2 text-primary mb-3">
+                  <Camera className="w-4 h-4" />
+                  <span className="text-xs font-semibold">Image Captured</span>
+                </div>
+                <div className="rounded-xl overflow-hidden border-2 border-border bg-muted mb-4">
+                  <img src={item.img} alt={item.model} className="w-full" />
+                </div>
+                <div className="flex items-center gap-3 mb-4 px-1">
+                  <div className="w-10 h-10 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-border">
+                    <img src={item.img} alt="" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-semibold text-foreground truncate">{item.brand} {item.model}</div>
+                    <div className="text-[10px] text-muted-foreground">{item.category}</div>
+                  </div>
+                  <Check className="w-4 h-4 text-success flex-shrink-0" />
+                </div>
+                <button
+                  onClick={() => startAnalysis()}
+                  className="w-full px-4 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-xs hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Analyze with AI
+                </button>
               </div>
             </motion.div>
           )}
