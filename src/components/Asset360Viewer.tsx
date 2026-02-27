@@ -15,18 +15,21 @@ const Asset360Viewer = ({ images, alt, className = "", onClick, overlay }: Asset
   const [isDragging, setIsDragging] = useState(false);
   const dragStartX = useRef(0);
   const lastIndex = useRef(0);
+  const hasDragged = useRef(false);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     setIsDragging(true);
     dragStartX.current = e.clientX;
     lastIndex.current = currentIndex;
+    hasDragged.current = false;
     e.preventDefault();
   }, [currentIndex]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isDragging || images.length <= 1) return;
     const dx = e.clientX - dragStartX.current;
-    const sensitivity = 80; // pixels per image switch
+    if (Math.abs(dx) > 5) hasDragged.current = true;
+    const sensitivity = 80;
     const indexDelta = Math.floor(dx / sensitivity);
     const newIndex = ((lastIndex.current + indexDelta) % images.length + images.length) % images.length;
     setCurrentIndex(newIndex);
@@ -40,11 +43,13 @@ const Asset360Viewer = ({ images, alt, className = "", onClick, overlay }: Asset
     setIsDragging(true);
     dragStartX.current = e.touches[0].clientX;
     lastIndex.current = currentIndex;
+    hasDragged.current = false;
   }, [currentIndex]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (!isDragging || images.length <= 1) return;
     const dx = e.touches[0].clientX - dragStartX.current;
+    if (Math.abs(dx) > 5) hasDragged.current = true;
     const sensitivity = 80;
     const indexDelta = Math.floor(dx / sensitivity);
     const newIndex = ((lastIndex.current + indexDelta) % images.length + images.length) % images.length;
@@ -68,7 +73,7 @@ const Asset360Viewer = ({ images, alt, className = "", onClick, overlay }: Asset
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        onClick={onClick}
+        onClick={(e) => { if (!hasDragged.current && onClick) onClick(e); }}
       >
         <motion.img
           key={currentIndex}
