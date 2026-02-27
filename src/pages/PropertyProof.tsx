@@ -131,7 +131,7 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
       icon={<Fingerprint className="w-5 h-5 text-primary" />}
       onLogout={onLogout}
     >
-      <div className="container mx-auto px-6 py-10 max-w-4xl">
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-10 max-w-4xl">
         <AnimatePresence mode="wait">
           {/* LISTING VIEW */}
           {view === "listing" && (
@@ -159,14 +159,14 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
                     className="glass-card p-4 flex items-center gap-4 hover:border-primary/30 transition-all cursor-pointer"
                     onClick={() => { setSelectedItem(i); setView("dna-select"); }}
                   >
-                    <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-border">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-border">
                       <img src={asset.img} alt={asset.model} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold text-foreground">{asset.brand} {asset.model}</div>
-                      <div className="text-xs text-muted-foreground">{asset.category} • Serial: <span className="font-mono">{asset.serial}</span></div>
+                      <div className="text-xs sm:text-sm font-semibold text-foreground truncate">{asset.brand} {asset.model}</div>
+                      <div className="text-xs text-muted-foreground truncate">{asset.category} • <span className="font-mono hidden sm:inline">Serial: {asset.serial}</span></div>
                     </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1 sm:gap-2 flex-shrink-0">
                       {asset.dnaPlaced ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-success/10 text-success text-xs font-medium">
                           <Fingerprint className="w-3 h-3" /> DNA Placed
@@ -255,8 +255,8 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
                   <Check className="w-5 h-5" />
                   <span className="text-sm font-semibold">AI Analysis Complete</span>
                 </div>
-                <div className="flex gap-6 mb-6">
-                  <div className="w-32 h-32 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-border">
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-6">
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-border mx-auto sm:mx-0">
                     <img src={item.img} alt={item.model} className="w-full h-full object-cover" />
                   </div>
                   <div className="space-y-2 text-sm">

@@ -119,19 +119,20 @@ const PropertyRoom = ({ onLogout }: { onLogout?: () => void }) => {
       icon={<Building2 className="w-5 h-5 text-primary" />}
       onLogout={onLogout}
     >
-      <div className="container mx-auto px-6 py-10 max-w-5xl">
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-10 max-w-5xl">
         {/* Tabs */}
-        <div className="flex gap-1 p-1 rounded-xl bg-muted mb-8 max-w-md">
+        <div className="flex gap-1 p-1 rounded-xl bg-muted mb-6 sm:mb-8 w-full sm:max-w-md overflow-x-auto">
           {tabs.map((t) => (
             <button
               key={t.id}
               onClick={() => { setTab(t.id); setCameraStep("ready"); setBulkStep("upload"); }}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                 tab === t.id ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {t.icon}
-              {t.label}
+              <span className="hidden sm:inline">{t.label}</span>
+              <span className="sm:hidden">{t.label.split(' ')[0]}</span>
             </button>
           ))}
         </div>

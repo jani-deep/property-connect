@@ -92,7 +92,7 @@ const Index = ({ onLogout }: { onLogout?: () => void }) => {
         style={{ background: "var(--gradient-glow)" }}
       />
 
-      <div className="relative container mx-auto px-6 py-16">
+      <div className="relative container mx-auto px-4 sm:px-6 py-10 sm:py-16">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -104,11 +104,11 @@ const Index = ({ onLogout }: { onLogout?: () => void }) => {
             <Shield className="w-4 h-4" />
             Florida Legislative Demo
           </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-4">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-extrabold tracking-tight mb-4">
             <span className="gradient-text">PropertyProof</span>
             <span className="text-foreground">™</span>
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             From resident registration to statewide recovered property intelligence.
             <br />
             <span className="text-foreground/80 font-medium">One verified ownership ecosystem.</span>
