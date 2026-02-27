@@ -131,56 +131,56 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
       icon={<Fingerprint className="w-5 h-5 text-primary" />}
       onLogout={onLogout}
     >
-      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-10 max-w-4xl">
+      <div className="px-4 py-4">
         <AnimatePresence mode="wait">
           {/* LISTING VIEW */}
           {view === "listing" && (
             <motion.div key="listing" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-2xl font-bold text-foreground">My Assets</h2>
-                  <p className="text-sm text-muted-foreground">{allAssets.length} items registered</p>
+                  <h2 className="text-lg font-bold text-foreground">My Assets</h2>
+                  <p className="text-xs text-muted-foreground">{allAssets.length} items registered</p>
                 </div>
                 <button
                   onClick={() => setView("capture")}
-                  className="px-4 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors flex items-center gap-2"
+                  className="px-3 py-2 rounded-lg bg-primary text-primary-foreground font-semibold text-xs hover:bg-primary/90 transition-colors flex items-center gap-1.5"
                 >
-                  <Plus className="w-4 h-4" />
-                  Add New Asset
+                  <Plus className="w-3.5 h-3.5" />
+                  Add Asset
                 </button>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {allAssets.map((asset, i) => (
                   <motion.div
                     key={i}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.06 }}
-                    className="glass-card p-4 flex items-center gap-4 hover:border-primary/30 transition-all cursor-pointer"
+                    transition={{ delay: i * 0.05 }}
+                    className="glass-card p-3 flex items-center gap-3 active:scale-[0.98] transition-transform cursor-pointer"
                     onClick={() => { setSelectedItem(i); setView("dna-select"); }}
                   >
-                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-border">
+                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-border">
                       <img src={asset.img} alt={asset.model} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs sm:text-sm font-semibold text-foreground truncate">{asset.brand} {asset.model}</div>
-                      <div className="text-xs text-muted-foreground truncate">{asset.category} • <span className="font-mono hidden sm:inline">Serial: {asset.serial}</span></div>
+                      <div className="text-xs font-semibold text-foreground truncate">{asset.brand} {asset.model}</div>
+                      <div className="text-[10px] text-muted-foreground truncate">{asset.category}</div>
                     </div>
-                    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1 sm:gap-2 flex-shrink-0">
+                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
                       {asset.dnaPlaced ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-success/10 text-success text-xs font-medium">
-                          <Fingerprint className="w-3 h-3" /> DNA Placed
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success/10 text-success text-[10px] font-medium">
+                          <Fingerprint className="w-2.5 h-2.5" /> DNA
                         </span>
                       ) : asset.registered ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-warning/10 text-warning text-xs font-medium">
-                          <Package className="w-3 h-3" /> Registered
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning/10 text-warning text-[10px] font-medium">
+                          <Package className="w-2.5 h-2.5" /> Reg
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-[10px]">
                           Pending
                         </span>
                       )}
-                      <span className="text-sm font-semibold text-foreground">{asset.value}</span>
+                      <span className="text-xs font-semibold text-foreground">{asset.value}</span>
                     </div>
                   </motion.div>
                 ))}
@@ -191,24 +191,24 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
           {/* CAPTURE / ADD NEW */}
           {view === "capture" && (
             <motion.div key="capture" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-              <button onClick={() => setView("listing")} className="text-sm text-muted-foreground hover:text-foreground mb-6 inline-flex items-center gap-1">
-                <ChevronLeft className="w-4 h-4" /> Back to Assets
+              <button onClick={() => setView("listing")} className="text-xs text-muted-foreground hover:text-foreground mb-4 inline-flex items-center gap-1">
+                <ChevronLeft className="w-3.5 h-3.5" /> Back to Assets
               </button>
-              <h2 className="text-2xl font-bold text-foreground mb-2 text-center">Add New Asset</h2>
-              <p className="text-muted-foreground text-center mb-8">Select an item to see AI analysis in action</p>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <h2 className="text-lg font-bold text-foreground mb-1 text-center">Add New Asset</h2>
+              <p className="text-xs text-muted-foreground text-center mb-6">Select an item to see AI analysis</p>
+              <div className="grid grid-cols-2 gap-3">
                 {allAssets.map((it, i) => (
                   <button
                     key={i}
                     onClick={() => startAnalysis(i)}
-                    className="glass-card p-4 hover:border-primary/40 transition-all group text-left"
+                    className="glass-card p-3 active:scale-[0.98] transition-transform text-left"
                   >
-                    <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-muted border border-border">
-                      <img src={it.img} alt={it.model} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    <div className="aspect-square rounded-lg overflow-hidden mb-2 bg-muted border border-border">
+                      <img src={it.img} alt={it.model} className="w-full h-full object-cover" />
                     </div>
-                    <div className="text-xs font-medium text-foreground truncate">{it.brand} {it.model}</div>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                      <Camera className="w-3 h-3 text-primary" />
+                    <div className="text-[11px] font-medium text-foreground truncate">{it.brand} {it.model}</div>
+                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5">
+                      <Camera className="w-2.5 h-2.5 text-primary" />
                       Tap to scan
                     </div>
                   </button>
@@ -220,23 +220,23 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
           {/* ANALYZING */}
           {view === "analyzing" && (
             <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center">
-              <div className="glass-card p-8 max-w-md mx-auto">
-                <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Sparkles className="w-8 h-8 text-primary animate-pulse" />
+              <div className="glass-card p-6">
+                <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Sparkles className="w-7 h-7 text-primary animate-pulse" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-4">AI Analyzing Image...</h3>
-                <div className="space-y-3 text-left text-sm mb-6">
+                <h3 className="text-base font-semibold text-foreground mb-4">AI Analyzing Image...</h3>
+                <div className="space-y-2.5 text-left text-sm mb-5">
                   {[
                     { label: "Object Detection", threshold: 20 },
                     { label: "Brand Recognition", threshold: 40 },
                     { label: "Model Identification", threshold: 60 },
                     { label: "Serial Number OCR", threshold: 80 },
                   ].map((task) => (
-                    <div key={task.label} className="flex items-center gap-3">
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center ${analyzeProgress >= task.threshold ? "bg-success text-success-foreground" : "bg-muted"}`}>
-                        {analyzeProgress >= task.threshold && <Check className="w-3 h-3" />}
+                    <div key={task.label} className="flex items-center gap-2.5">
+                      <div className={`w-4 h-4 rounded-full flex items-center justify-center ${analyzeProgress >= task.threshold ? "bg-success text-success-foreground" : "bg-muted"}`}>
+                        {analyzeProgress >= task.threshold && <Check className="w-2.5 h-2.5" />}
                       </div>
-                      <span className={analyzeProgress >= task.threshold ? "text-foreground" : "text-muted-foreground"}>{task.label}</span>
+                      <span className={`text-xs ${analyzeProgress >= task.threshold ? "text-foreground" : "text-muted-foreground"}`}>{task.label}</span>
                     </div>
                   ))}
                 </div>
@@ -250,16 +250,16 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
           {/* RESULTS */}
           {view === "results" && (
             <motion.div key="results" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-              <div className="glass-card p-8 max-w-lg mx-auto">
+              <div className="glass-card p-5">
                 <div className="flex items-center gap-2 text-success mb-4">
-                  <Check className="w-5 h-5" />
-                  <span className="text-sm font-semibold">AI Analysis Complete</span>
+                  <Check className="w-4 h-4" />
+                  <span className="text-xs font-semibold">AI Analysis Complete</span>
                 </div>
-              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-6">
-                  <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-border mx-auto sm:mx-0">
+                <div className="flex gap-4 mb-5">
+                  <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-border">
                     <img src={item.img} alt={item.model} className="w-full h-full object-cover" />
                   </div>
-                  <div className="space-y-2 text-sm">
+                  <div className="space-y-1.5 text-xs">
                     {[
                       ["Brand", item.brand],
                       ["Model", item.model],
@@ -274,11 +274,11 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
                     ))}
                   </div>
                 </div>
-                <div className="flex gap-3">
-                  <button onClick={() => setView("dna-select")} className="flex-1 px-4 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors">
+                <div className="flex gap-2">
+                  <button onClick={() => setView("dna-select")} className="flex-1 px-3 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-xs hover:bg-primary/90 transition-colors">
                     Confirm & Add DNA PIN
                   </button>
-                  <button onClick={() => setView("capture")} className="px-4 py-3 rounded-lg bg-muted text-muted-foreground text-sm hover:bg-muted/80 transition-colors">
+                  <button onClick={() => setView("capture")} className="px-3 py-2.5 rounded-lg bg-muted text-muted-foreground text-xs">
                     Retake
                   </button>
                 </div>
@@ -289,67 +289,65 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
           {/* DNA PIN */}
           {view === "dna-select" && (
             <motion.div key="dna-select" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-              <button onClick={() => setView("listing")} className="text-sm text-muted-foreground hover:text-foreground mb-6 inline-flex items-center gap-1">
-                <ChevronLeft className="w-4 h-4" /> Back to Assets
+              <button onClick={() => setView("listing")} className="text-xs text-muted-foreground hover:text-foreground mb-4 inline-flex items-center gap-1">
+                <ChevronLeft className="w-3.5 h-3.5" /> Back to Assets
               </button>
-              <div className="glass-card p-8 max-w-md mx-auto text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-accent/10 flex items-center justify-center">
-                  <Fingerprint className="w-8 h-8 text-accent" />
+              <div className="glass-card p-6 text-center">
+                <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-accent/10 flex items-center justify-center">
+                  <Fingerprint className="w-7 h-7 text-accent" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">Your DNA PIN</h3>
-                <p className="text-sm text-muted-foreground mb-6">This unique code links your physical DNA adhesive to your digital inventory.</p>
-                <div className="px-6 py-4 rounded-lg bg-muted font-mono text-xl font-bold text-accent mb-6 tracking-wider">
+                <h3 className="text-base font-semibold text-foreground mb-2">Your DNA PIN</h3>
+                <p className="text-xs text-muted-foreground mb-5">This unique code links your physical DNA adhesive to your digital inventory.</p>
+                <div className="px-4 py-3 rounded-lg bg-muted font-mono text-lg font-bold text-accent mb-5 tracking-wider">
                   {dnaPin}
                 </div>
-                <button onClick={() => { setMarkerPos(null); setView("dna-place"); }} className="w-full px-4 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors">
+                <button onClick={() => { setMarkerPos(null); setView("dna-place"); }} className="w-full px-4 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-xs hover:bg-primary/90 transition-colors">
                   Place DNA Marker on Item
                 </button>
               </div>
             </motion.div>
           )}
 
-          {/* DNA PLACEMENT with 360° rotation */}
+          {/* DNA PLACEMENT */}
           {view === "dna-place" && (
             <motion.div key="dna-place" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-              <button onClick={() => setView("dna-select")} className="text-sm text-muted-foreground hover:text-foreground mb-4 inline-flex items-center gap-1">
-                <ChevronLeft className="w-4 h-4" /> Back
+              <button onClick={() => setView("dna-select")} className="text-xs text-muted-foreground hover:text-foreground mb-3 inline-flex items-center gap-1">
+                <ChevronLeft className="w-3.5 h-3.5" /> Back
               </button>
-              <h3 className="text-lg font-semibold text-foreground mb-2 text-center">Tap Where You Applied the DNA Adhesive</h3>
-              <p className="text-sm text-muted-foreground text-center mb-4">Drag to rotate 360° view, then tap to mark DNA placement</p>
+              <h3 className="text-sm font-semibold text-foreground mb-1 text-center">Tap Where You Applied the DNA Adhesive</h3>
+              <p className="text-[10px] text-muted-foreground text-center mb-3">Drag to rotate • Tap to mark DNA placement</p>
 
-              <div className="max-w-lg mx-auto">
-                <Asset360Viewer
-                  images={item.images}
-                  alt={item.model}
-                  onClick={handleImageClick}
-                  overlay={
-                    markerPos ? (
-                      <div
-                        className={`dna-marker ${markerActive ? "active" : ""}`}
-                        style={{ left: `${markerPos.x}%`, top: `${markerPos.y}%`, transform: "translate(-50%, -50%)" }}
-                        onMouseDown={() => setMarkerActive(true)}
-                        onMouseUp={() => setMarkerActive(false)}
-                        onMouseLeave={() => setMarkerActive(false)}
-                        onTouchStart={() => setMarkerActive(true)}
-                        onTouchEnd={() => setMarkerActive(false)}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {markerActive && dnaPin}
-                      </div>
-                    ) : undefined
-                  }
-                />
-              </div>
+              <Asset360Viewer
+                images={item.images}
+                alt={item.model}
+                onClick={handleImageClick}
+                overlay={
+                  markerPos ? (
+                    <div
+                      className={`dna-marker ${markerActive ? "active" : ""}`}
+                      style={{ left: `${markerPos.x}%`, top: `${markerPos.y}%`, transform: "translate(-50%, -50%)" }}
+                      onMouseDown={() => setMarkerActive(true)}
+                      onMouseUp={() => setMarkerActive(false)}
+                      onMouseLeave={() => setMarkerActive(false)}
+                      onTouchStart={() => setMarkerActive(true)}
+                      onTouchEnd={() => setMarkerActive(false)}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {markerActive && dnaPin}
+                    </div>
+                  ) : undefined
+                }
+              />
               {markerPos && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6 text-center">
-                  <p className="text-xs text-muted-foreground mb-4">
-                    Tap & hold the marker to verify PIN • Tap image to reposition
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-4 text-center">
+                  <p className="text-[10px] text-muted-foreground mb-3">
+                    Tap & hold marker to verify PIN • Tap image to reposition
                   </p>
                   <button
                     onClick={() => { setView("listing"); setMarkerPos(null); }}
-                    className="px-6 py-3 rounded-lg bg-success text-success-foreground font-semibold text-sm hover:bg-success/90 transition-colors"
+                    className="w-full px-4 py-3 rounded-lg bg-success text-success-foreground font-semibold text-xs hover:bg-success/90 transition-colors"
                   >
-                    <Check className="w-4 h-4 inline mr-2" />
+                    <Check className="w-3.5 h-3.5 inline mr-1.5" />
                     Registration Complete
                   </button>
                 </motion.div>
