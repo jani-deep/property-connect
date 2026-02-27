@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Shield, Search, Building2, ArrowRight, Fingerprint, ChevronRight } from "lucide-react";
+import { Shield, Search, Building2, ArrowRight, Fingerprint, ChevronRight, User, LogOut } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 
 const pillars = [
   {
@@ -35,9 +36,56 @@ const pillars = [
   },
 ];
 
-const Index = () => {
+const Index = ({ onLogout }: { onLogout?: () => void }) => {
+  const [profileOpen, setProfileOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Profile in top-right */}
+      <div className="absolute top-4 right-6 z-20" ref={dropdownRef}>
+        <button
+          onClick={() => setProfileOpen(!profileOpen)}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted transition-colors"
+        >
+          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+            <User className="w-4 h-4 text-primary" />
+          </div>
+          <span className="text-sm font-medium text-foreground hidden sm:inline">Demo User</span>
+        </button>
+        {profileOpen && (
+          <div className="absolute right-0 top-full mt-2 w-56 glass-card py-1.5 z-50 animate-fade-in">
+            <div className="px-4 py-3 border-b border-border/50">
+              <div className="text-sm font-semibold text-foreground">Demo User</div>
+              <div className="text-xs text-muted-foreground">+1 (555) 000-0000</div>
+            </div>
+            <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors">
+              <User className="w-4 h-4 text-muted-foreground" />
+              My Profile
+            </button>
+            {onLogout && (
+              <button
+                onClick={() => { setProfileOpen(false); onLogout(); }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-destructive hover:bg-destructive/5 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* Background glow */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] opacity-30 pointer-events-none"
