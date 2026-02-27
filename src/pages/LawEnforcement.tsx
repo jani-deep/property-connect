@@ -84,7 +84,7 @@ const carMatches = [
   },
 ];
 
-const LawEnforcement = () => {
+const LawEnforcement = ({ onLogout }: { onLogout?: () => void }) => {
   const [step, setStep] = useState<Step>("home");
   const [selectedMatch, setSelectedMatch] = useState(0);
   const [markerActive, setMarkerActive] = useState(false);
@@ -126,6 +126,7 @@ const LawEnforcement = () => {
       title="Law Enforcement"
       subtitle="AI Image Search + Intelligence"
       icon={<Search className="w-5 h-5 text-primary" />}
+      onLogout={onLogout}
     >
       <div className="container mx-auto px-6 py-10 max-w-4xl">
         <AnimatePresence mode="wait">

@@ -45,7 +45,7 @@ const bulkResults = [
   { serial: "KEY-HC-29401", item: "Honda Civic Keys", match: "No Match Found", confidence: 0, img: demoKeys },
 ];
 
-const PropertyRoom = () => {
+const PropertyRoom = ({ onLogout }: { onLogout?: () => void }) => {
   const [tab, setTab] = useState<Tab>("dashboard");
   const [bulkStep, setBulkStep] = useState<"upload" | "detecting" | "detected" | "scanning" | "results">("upload");
   const [cameraStep, setCameraStep] = useState<"ready" | "scanning" | "result">("ready");
@@ -117,6 +117,7 @@ const PropertyRoom = () => {
       title="FL Property Room"
       subtitle="Statewide Integration"
       icon={<Building2 className="w-5 h-5 text-primary" />}
+      onLogout={onLogout}
     >
       <div className="container mx-auto px-6 py-10 max-w-5xl">
         {/* Tabs */}

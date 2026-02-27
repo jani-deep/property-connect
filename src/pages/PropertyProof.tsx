@@ -1,12 +1,23 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Fingerprint, Camera, Check, Sparkles, Plus, Package, RotateCcw, ChevronLeft } from "lucide-react";
+import { Fingerprint, Camera, Check, Sparkles, Plus, Package, ChevronLeft } from "lucide-react";
 import DemoLayout from "@/components/DemoLayout";
+import Asset360Viewer from "@/components/Asset360Viewer";
 import demoWatch from "@/assets/demo-watch.jpg";
+import demoWatchSide from "@/assets/demo-watch-side.jpg";
+import demoWatchBack from "@/assets/demo-watch-back.jpg";
 import demoLaptop from "@/assets/demo-laptop.jpg";
+import demoLaptopSide from "@/assets/demo-laptop-side.jpg";
+import demoLaptopBack from "@/assets/demo-laptop-back.jpg";
 import demoCamera from "@/assets/demo-camera.jpg";
+import demoCameraSide from "@/assets/demo-camera-side.jpg";
+import demoCameraBack from "@/assets/demo-camera-back.jpg";
 import demoCar from "@/assets/demo-car.jpg";
+import demoCarSide from "@/assets/demo-car-side.jpg";
+import demoCarBack from "@/assets/demo-car-back.jpg";
 import demoPhone from "@/assets/demo-phone.jpg";
+import demoPhoneSide from "@/assets/demo-phone-side.jpg";
+import demoPhoneBack from "@/assets/demo-phone-back.jpg";
 import demoKeys from "@/assets/demo-keys.jpg";
 
 type View = "listing" | "capture" | "analyzing" | "results" | "dna-select" | "dna-place";
@@ -14,6 +25,7 @@ type View = "listing" | "capture" | "analyzing" | "results" | "dna-select" | "dn
 const allAssets = [
   {
     img: demoCar,
+    images: [demoCar, demoCarSide, demoCarBack],
     brand: "BMW",
     model: "5 Series 530i xDrive",
     category: "Vehicle – Sedan",
@@ -24,6 +36,7 @@ const allAssets = [
   },
   {
     img: demoWatch,
+    images: [demoWatch, demoWatchSide, demoWatchBack],
     brand: "Rolex",
     model: "Submariner Date 126610LN",
     category: "Luxury Watch",
@@ -34,6 +47,7 @@ const allAssets = [
   },
   {
     img: demoLaptop,
+    images: [demoLaptop, demoLaptopSide, demoLaptopBack],
     brand: "Apple",
     model: 'MacBook Pro 16" M3 Max',
     category: "Electronics – Laptop",
@@ -44,6 +58,7 @@ const allAssets = [
   },
   {
     img: demoCamera,
+    images: [demoCamera, demoCameraSide, demoCameraBack],
     brand: "Canon",
     model: "EOS R5 Mark II",
     category: "Electronics – Camera",
@@ -54,6 +69,7 @@ const allAssets = [
   },
   {
     img: demoPhone,
+    images: [demoPhone, demoPhoneSide, demoPhoneBack],
     brand: "Apple",
     model: "iPhone 15 Pro Max",
     category: "Electronics – Mobile",
@@ -64,6 +80,7 @@ const allAssets = [
   },
   {
     img: demoKeys,
+    images: [demoKeys],
     brand: "Honda",
     model: "Civic Key Fob + Keys",
     category: "Vehicle Accessory – Keys",
@@ -74,14 +91,13 @@ const allAssets = [
   },
 ];
 
-const PropertyProof = () => {
+const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
   const [view, setView] = useState<View>("listing");
   const [selectedItem, setSelectedItem] = useState(0);
   const [dnaPin] = useState("FL-DNA-7829-AX");
   const [markerPos, setMarkerPos] = useState<{ x: number; y: number } | null>(null);
   const [markerActive, setMarkerActive] = useState(false);
   const [analyzeProgress, setAnalyzeProgress] = useState(0);
-  const [rotationAngle, setRotationAngle] = useState(0);
 
   const item = allAssets[selectedItem];
 
@@ -102,15 +118,10 @@ const PropertyProof = () => {
   };
 
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (view !== "dna-place") return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     setMarkerPos({ x, y });
-  };
-
-  const rotate = (dir: number) => {
-    setRotationAngle((a) => a + dir * 45);
   };
 
   return (
@@ -118,6 +129,7 @@ const PropertyProof = () => {
       title="PropertyProof™"
       subtitle="AI Inventory + DNA Placement"
       icon={<Fingerprint className="w-5 h-5 text-primary" />}
+      onLogout={onLogout}
     >
       <div className="container mx-auto px-6 py-10 max-w-4xl">
         <AnimatePresence mode="wait">
@@ -289,7 +301,7 @@ const PropertyProof = () => {
                 <div className="px-6 py-4 rounded-lg bg-muted font-mono text-xl font-bold text-accent mb-6 tracking-wider">
                   {dnaPin}
                 </div>
-                <button onClick={() => { setMarkerPos(null); setRotationAngle(0); setView("dna-place"); }} className="w-full px-4 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors">
+                <button onClick={() => { setMarkerPos(null); setView("dna-place"); }} className="w-full px-4 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors">
                   Place DNA Marker on Item
                 </button>
               </div>
@@ -303,49 +315,30 @@ const PropertyProof = () => {
                 <ChevronLeft className="w-4 h-4" /> Back
               </button>
               <h3 className="text-lg font-semibold text-foreground mb-2 text-center">Tap Where You Applied the DNA Adhesive</h3>
-              <p className="text-sm text-muted-foreground text-center mb-4">Use 360° rotation to find the exact angle, then tap to mark placement</p>
+              <p className="text-sm text-muted-foreground text-center mb-4">Drag to rotate 360° view, then tap to mark DNA placement</p>
 
-              {/* Rotation Controls */}
-              <div className="flex items-center justify-center gap-4 mb-4">
-                <button onClick={() => rotate(-1)} className="p-2.5 rounded-lg bg-muted hover:bg-muted/80 text-foreground transition-colors border border-border">
-                  <RotateCcw className="w-4 h-4" />
-                </button>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground font-mono">{rotationAngle}°</span>
-                  <div className="w-24 h-1.5 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${((rotationAngle % 360 + 360) % 360) / 360 * 100}%` }} />
-                  </div>
-                  <span className="text-xs text-muted-foreground">360°</span>
-                </div>
-                <button onClick={() => rotate(1)} className="p-2.5 rounded-lg bg-muted hover:bg-muted/80 text-foreground transition-colors border border-border">
-                  <RotateCcw className="w-4 h-4 -scale-x-100" />
-                </button>
-              </div>
-
-              <div
-                className="relative max-w-lg mx-auto rounded-xl overflow-hidden cursor-crosshair border-2 border-border bg-muted"
-                onClick={handleImageClick}
-              >
-                <img
-                  src={item.img}
+              <div className="max-w-lg mx-auto">
+                <Asset360Viewer
+                  images={item.images}
                   alt={item.model}
-                  className="w-full transition-transform duration-500"
-                  style={{ transform: `rotate(${rotationAngle}deg) scale(${rotationAngle % 90 !== 0 ? 1.2 : 1})` }}
+                  onClick={handleImageClick}
+                  overlay={
+                    markerPos ? (
+                      <div
+                        className={`dna-marker ${markerActive ? "active" : ""}`}
+                        style={{ left: `${markerPos.x}%`, top: `${markerPos.y}%`, transform: "translate(-50%, -50%)" }}
+                        onMouseDown={() => setMarkerActive(true)}
+                        onMouseUp={() => setMarkerActive(false)}
+                        onMouseLeave={() => setMarkerActive(false)}
+                        onTouchStart={() => setMarkerActive(true)}
+                        onTouchEnd={() => setMarkerActive(false)}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {markerActive && dnaPin}
+                      </div>
+                    ) : undefined
+                  }
                 />
-                {markerPos && (
-                  <div
-                    className={`dna-marker ${markerActive ? "active" : ""}`}
-                    style={{ left: `${markerPos.x}%`, top: `${markerPos.y}%`, transform: "translate(-50%, -50%)" }}
-                    onMouseDown={() => setMarkerActive(true)}
-                    onMouseUp={() => setMarkerActive(false)}
-                    onMouseLeave={() => setMarkerActive(false)}
-                    onTouchStart={() => setMarkerActive(true)}
-                    onTouchEnd={() => setMarkerActive(false)}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {markerActive && dnaPin}
-                  </div>
-                )}
               </div>
               {markerPos && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6 text-center">

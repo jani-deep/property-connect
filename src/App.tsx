@@ -16,6 +16,10 @@ const queryClient = new QueryClient();
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+  };
+
   if (!isLoggedIn) {
     return (
       <QueryClientProvider client={queryClient}>
@@ -35,10 +39,10 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/property-proof" element={<PropertyProof />} />
-            <Route path="/law-enforcement" element={<LawEnforcement />} />
-            <Route path="/property-room" element={<PropertyRoom />} />
+            <Route path="/" element={<Index onLogout={handleLogout} />} />
+            <Route path="/property-proof" element={<PropertyProof onLogout={handleLogout} />} />
+            <Route path="/law-enforcement" element={<LawEnforcement onLogout={handleLogout} />} />
+            <Route path="/property-room" element={<PropertyRoom onLogout={handleLogout} />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
