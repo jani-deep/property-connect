@@ -1,14 +1,24 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Camera, User, MapPin, AlertTriangle, Shield, Check, Fingerprint } from "lucide-react";
+import { Search, Camera, User, MapPin, AlertTriangle, Shield, Check, Fingerprint, Clock } from "lucide-react";
 import DemoLayout from "@/components/DemoLayout";
 import demoWatch from "@/assets/demo-watch.jpg";
 import demoLaptop from "@/assets/demo-laptop.jpg";
 import demoCamera from "@/assets/demo-camera.jpg";
+import demoCar from "@/assets/demo-car.jpg";
 
-type Step = "scan" | "searching" | "results" | "detail";
+type Step = "home" | "searching" | "results" | "detail";
 
-const matches = [
+const searchHistory = [
+  { img: demoCar, label: "BMW 5 Series – Sedan", date: "Today, 2:15 PM" },
+  { img: demoWatch, label: "Rolex Submariner – Watch", date: "Today, 11:30 AM" },
+  { img: demoLaptop, label: "MacBook Pro 16\" – Laptop", date: "Yesterday" },
+  { img: demoCamera, label: "Canon EOS R5 – Camera", date: "2 days ago" },
+];
+
+const matchSets: Record<string, typeof defaultMatches> = {};
+
+const defaultMatches = [
   {
     confidence: 97,
     owner: "John Smith",
@@ -47,15 +57,44 @@ const matches = [
   },
 ];
 
+const carMatches = [
+  {
+    confidence: 95,
+    owner: "David Williams",
+    county: "Brevard County",
+    status: "Reported Stolen",
+    stolen: true,
+    serial: "WBA53BJ09RWC18294",
+    item: "BMW 5 Series 530i xDrive",
+    img: demoCar,
+    dnaPin: "FL-DNA-3301-VK",
+    markerPos: { x: 20, y: 70 },
+  },
+  {
+    confidence: 61,
+    owner: "Linda Nguyen",
+    county: "Palm Beach County",
+    status: "Not Reported",
+    stolen: false,
+    serial: "WBA53BJ09RWC19887",
+    item: "BMW 5 Series (Similar VIN)",
+    img: demoCar,
+    dnaPin: "FL-DNA-5520-MR",
+    markerPos: { x: 80, y: 50 },
+  },
+];
+
 const LawEnforcement = () => {
-  const [step, setStep] = useState<Step>("scan");
+  const [step, setStep] = useState<Step>("home");
   const [selectedMatch, setSelectedMatch] = useState(0);
   const [markerActive, setMarkerActive] = useState(false);
   const [searchProgress, setSearchProgress] = useState(0);
+  const [matches, setMatches] = useState(defaultMatches);
 
-  const startSearch = () => {
+  const startSearch = (useCarMatches = false) => {
     setStep("searching");
     setSearchProgress(0);
+    setMatches(useCarMatches ? carMatches : defaultMatches);
     const interval = setInterval(() => {
       setSearchProgress((p) => {
         if (p >= 100) {
@@ -90,19 +129,48 @@ const LawEnforcement = () => {
     >
       <div className="container mx-auto px-6 py-10 max-w-4xl">
         <AnimatePresence mode="wait">
-          {/* SCAN */}
-          {step === "scan" && (
-            <motion.div key="scan" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center">
-              <div className="glass-card p-10 max-w-md mx-auto">
+          {/* HOME with search history */}
+          {step === "home" && (
+            <motion.div key="home" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+              <div className="glass-card p-8 max-w-md mx-auto text-center mb-8">
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
                   <Camera className="w-10 h-10 text-primary" />
                 </div>
                 <h2 className="text-2xl font-bold text-foreground mb-2">Scan Recovered Item</h2>
-                <p className="text-sm text-muted-foreground mb-8">Photograph recovered property to search the registered owner database</p>
-                <button onClick={startSearch} className="w-full px-6 py-4 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
+                <p className="text-sm text-muted-foreground mb-6">Photograph recovered property to search the registered owner database</p>
+                <button onClick={() => startSearch(false)} className="w-full px-6 py-4 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
                   <Camera className="w-5 h-5" />
                   Capture & Search
                 </button>
+              </div>
+
+              {/* Search History */}
+              <div className="max-w-md mx-auto">
+                <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-muted-foreground" />
+                  Recent Searches
+                </h3>
+                <div className="space-y-2">
+                  {searchHistory.map((h, i) => (
+                    <motion.button
+                      key={i}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 + i * 0.08 }}
+                      onClick={() => startSearch(i === 0)}
+                      className="w-full glass-card p-3 flex items-center gap-3 hover:border-primary/30 transition-all text-left"
+                    >
+                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                        <img src={h.img} alt="" className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-foreground">{h.label}</div>
+                        <div className="text-xs text-muted-foreground">{h.date}</div>
+                      </div>
+                      <Search className="w-4 h-4 text-muted-foreground" />
+                    </motion.button>
+                  ))}
+                </div>
               </div>
             </motion.div>
           )}
@@ -147,7 +215,7 @@ const LawEnforcement = () => {
                   <h2 className="text-xl font-bold text-foreground">Search Results</h2>
                   <p className="text-sm text-muted-foreground">{matches.length} potential matches found</p>
                 </div>
-                <button onClick={() => setStep("scan")} className="px-4 py-2 rounded-lg bg-muted text-muted-foreground text-sm hover:bg-muted/80 transition-colors">
+                <button onClick={() => setStep("home")} className="px-4 py-2 rounded-lg bg-muted text-muted-foreground text-sm hover:bg-muted/80 transition-colors">
                   New Search
                 </button>
               </div>
@@ -203,7 +271,6 @@ const LawEnforcement = () => {
                 ← Back to Results
               </button>
               <div className="grid md:grid-cols-2 gap-6">
-                {/* Image with DNA marker */}
                 <div className="glass-card p-4">
                   <div className="relative rounded-lg overflow-hidden">
                     <img src={match.img} alt="" className="w-full" />
@@ -225,7 +292,6 @@ const LawEnforcement = () => {
                   </p>
                 </div>
 
-                {/* Details */}
                 <div className="space-y-4">
                   <div className="glass-card p-6">
                     <div className="flex items-center gap-2 mb-4">
