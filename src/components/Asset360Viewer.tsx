@@ -1,5 +1,4 @@
 import { useState, useRef, useCallback } from "react";
-import { motion } from "framer-motion";
 import { RotateCcw } from "lucide-react";
 
 interface Asset360ViewerProps {
@@ -11,102 +10,61 @@ interface Asset360ViewerProps {
 }
 
 const Asset360Viewer = ({ images, alt, className = "", onClick, overlay }: Asset360ViewerProps) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [rotationY, setRotationY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const dragStartX = useRef(0);
-  const lastIndex = useRef(0);
+  const startRotation = useRef(0);
   const hasDragged = useRef(false);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
     setIsDragging(true);
     dragStartX.current = e.clientX;
-    lastIndex.current = currentIndex;
+    startRotation.current = rotationY;
     hasDragged.current = false;
-    e.preventDefault();
-  }, [currentIndex]);
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  }, [rotationY]);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!isDragging || images.length <= 1) return;
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!isDragging) return;
     const dx = e.clientX - dragStartX.current;
-    if (Math.abs(dx) > 5) hasDragged.current = true;
-    const sensitivity = 80;
-    const indexDelta = Math.floor(dx / sensitivity);
-    const newIndex = ((lastIndex.current + indexDelta) % images.length + images.length) % images.length;
-    setCurrentIndex(newIndex);
-  }, [isDragging, images.length]);
+    if (Math.abs(dx) > 3) hasDragged.current = true;
+    setRotationY(startRotation.current + dx * 0.5);
+  }, [isDragging]);
 
-  const handleMouseUp = useCallback(() => {
+  const handlePointerUp = useCallback(() => {
     setIsDragging(false);
   }, []);
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    setIsDragging(true);
-    dragStartX.current = e.touches[0].clientX;
-    lastIndex.current = currentIndex;
-    hasDragged.current = false;
-  }, [currentIndex]);
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!isDragging || images.length <= 1) return;
-    const dx = e.touches[0].clientX - dragStartX.current;
-    if (Math.abs(dx) > 5) hasDragged.current = true;
-    const sensitivity = 80;
-    const indexDelta = Math.floor(dx / sensitivity);
-    const newIndex = ((lastIndex.current + indexDelta) % images.length + images.length) % images.length;
-    setCurrentIndex(newIndex);
-  }, [isDragging, images.length]);
-
-  const handleTouchEnd = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
-  const labels = ["Front", "Side", "Back"];
+  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!hasDragged.current && onClick) onClick(e);
+  }, [onClick]);
 
   return (
     <div className={`relative ${className}`}>
       <div
         className={`relative rounded-xl overflow-hidden border-2 border-border bg-muted select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onClick={(e) => { if (!hasDragged.current && onClick) onClick(e); }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        onClick={handleClick}
+        style={{ perspective: "800px" }}
       >
-        <motion.img
-          key={currentIndex}
-          src={images[currentIndex]}
-          alt={`${alt} - ${labels[currentIndex] || `View ${currentIndex + 1}`}`}
-          className="w-full"
-          initial={{ opacity: 0.7 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
-        />
+        <div style={{ transform: `rotateY(${rotationY}deg)`, transition: isDragging ? "none" : "transform 0.3s ease-out" }}>
+          <img
+            src={images[0]}
+            alt={alt}
+            className="w-full pointer-events-none"
+            draggable={false}
+          />
+        </div>
         {overlay}
       </div>
 
-      {/* View indicator + drag hint */}
-      {images.length > 1 && (
-        <div className="mt-3 flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            {images.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentIndex(i)}
-                className={`h-1.5 rounded-full transition-all ${
-                  i === currentIndex ? "w-6 bg-primary" : "w-1.5 bg-border hover:bg-muted-foreground"
-                }`}
-              />
-            ))}
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <RotateCcw className="w-3 h-3" />
-            <span>Drag to rotate • {labels[currentIndex] || `View ${currentIndex + 1}`}</span>
-          </div>
-        </div>
-      )}
+      <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+        <RotateCcw className="w-3 h-3" />
+        <span>Drag to rotate 360°</span>
+      </div>
     </div>
   );
 };
