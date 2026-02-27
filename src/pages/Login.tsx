@@ -31,9 +31,9 @@ const Login = ({ onLogin }: LoginProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-6 overflow-hidden">
       <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] opacity-30 pointer-events-none"
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] sm:w-[600px] h-[300px] sm:h-[400px] opacity-30 pointer-events-none"
         style={{ background: "var(--gradient-glow)" }}
       />
       <motion.div
@@ -41,18 +41,18 @@ const Login = ({ onLogin }: LoginProps) => {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-sm relative"
       >
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-primary/10 flex items-center justify-center">
-            <Shield className="w-8 h-8 text-primary" />
+        <div className="text-center mb-4 sm:mb-8">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-2xl bg-primary/10 flex items-center justify-center">
+            <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight mb-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-1">
             <span className="gradient-text">PropertyProof</span>
             <span className="text-foreground">™</span>
           </h1>
-          <p className="text-sm text-muted-foreground">Florida Legislative Demo</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">Florida Legislative Demo</p>
         </div>
 
-        <div className="glass-card p-6">
+        <div className="glass-card p-4 sm:p-6">
           {step === "phone" ? (
             <div>
               <label className="text-sm font-medium text-foreground mb-2 block">Mobile Number</label>
