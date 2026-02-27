@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Fingerprint, Camera, Check, Sparkles, X, Plus, Package, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
+import { Fingerprint, Camera, Check, Sparkles, Plus, Package, RotateCcw, ChevronLeft } from "lucide-react";
 import DemoLayout from "@/components/DemoLayout";
 import demoWatch from "@/assets/demo-watch.jpg";
 import demoLaptop from "@/assets/demo-laptop.jpg";
 import demoCamera from "@/assets/demo-camera.jpg";
 import demoCar from "@/assets/demo-car.jpg";
+import demoPhone from "@/assets/demo-phone.jpg";
+import demoKeys from "@/assets/demo-keys.jpg";
 
 type View = "listing" | "capture" | "analyzing" | "results" | "dna-select" | "dna-place";
 
@@ -19,7 +21,6 @@ const allAssets = [
     value: "$56,200",
     registered: true,
     dnaPlaced: true,
-    images: [demoCar],
   },
   {
     img: demoWatch,
@@ -30,7 +31,6 @@ const allAssets = [
     value: "$14,500",
     registered: true,
     dnaPlaced: true,
-    images: [demoWatch],
   },
   {
     img: demoLaptop,
@@ -41,7 +41,6 @@ const allAssets = [
     value: "$3,499",
     registered: true,
     dnaPlaced: false,
-    images: [demoLaptop],
   },
   {
     img: demoCamera,
@@ -52,7 +51,26 @@ const allAssets = [
     value: "$4,299",
     registered: false,
     dnaPlaced: false,
-    images: [demoCamera],
+  },
+  {
+    img: demoPhone,
+    brand: "Apple",
+    model: "iPhone 15 Pro Max",
+    category: "Electronics – Mobile",
+    serial: "F2LXK4MNHG73",
+    value: "$1,199",
+    registered: false,
+    dnaPlaced: false,
+  },
+  {
+    img: demoKeys,
+    brand: "Honda",
+    model: "Civic Key Fob + Keys",
+    category: "Vehicle Accessory – Keys",
+    serial: "KEY-HC-29401",
+    value: "$350",
+    registered: false,
+    dnaPlaced: false,
   },
 ];
 
@@ -125,11 +143,11 @@ const PropertyProof = () => {
                     key={i}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.08 }}
+                    transition={{ delay: i * 0.06 }}
                     className="glass-card p-4 flex items-center gap-4 hover:border-primary/30 transition-all cursor-pointer"
                     onClick={() => { setSelectedItem(i); setView("dna-select"); }}
                   >
-                    <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                    <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-border">
                       <img src={asset.img} alt={asset.model} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -166,14 +184,14 @@ const PropertyProof = () => {
               </button>
               <h2 className="text-2xl font-bold text-foreground mb-2 text-center">Add New Asset</h2>
               <p className="text-muted-foreground text-center mb-8">Select an item to see AI analysis in action</p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {allAssets.map((it, i) => (
                   <button
                     key={i}
                     onClick={() => startAnalysis(i)}
                     className="glass-card p-4 hover:border-primary/40 transition-all group text-left"
                   >
-                    <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-muted">
+                    <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-muted border border-border">
                       <img src={it.img} alt={it.model} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                     </div>
                     <div className="text-xs font-medium text-foreground truncate">{it.brand} {it.model}</div>
@@ -226,7 +244,7 @@ const PropertyProof = () => {
                   <span className="text-sm font-semibold">AI Analysis Complete</span>
                 </div>
                 <div className="flex gap-6 mb-6">
-                  <div className="w-32 h-32 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                  <div className="w-32 h-32 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-border">
                     <img src={item.img} alt={item.model} className="w-full h-full object-cover" />
                   </div>
                   <div className="space-y-2 text-sm">
@@ -278,28 +296,34 @@ const PropertyProof = () => {
             </motion.div>
           )}
 
-          {/* DNA PLACEMENT with 360 rotation */}
+          {/* DNA PLACEMENT with 360° rotation */}
           {view === "dna-place" && (
             <motion.div key="dna-place" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
               <button onClick={() => setView("dna-select")} className="text-sm text-muted-foreground hover:text-foreground mb-4 inline-flex items-center gap-1">
                 <ChevronLeft className="w-4 h-4" /> Back
               </button>
               <h3 className="text-lg font-semibold text-foreground mb-2 text-center">Tap Where You Applied the DNA Adhesive</h3>
-              <p className="text-sm text-muted-foreground text-center mb-4">Rotate the image to find the right angle, then tap to mark placement</p>
+              <p className="text-sm text-muted-foreground text-center mb-4">Use 360° rotation to find the exact angle, then tap to mark placement</p>
 
               {/* Rotation Controls */}
               <div className="flex items-center justify-center gap-4 mb-4">
-                <button onClick={() => rotate(-1)} className="p-2 rounded-lg bg-muted hover:bg-muted/80 text-foreground transition-colors">
+                <button onClick={() => rotate(-1)} className="p-2.5 rounded-lg bg-muted hover:bg-muted/80 text-foreground transition-colors border border-border">
                   <RotateCcw className="w-4 h-4" />
                 </button>
-                <span className="text-xs text-muted-foreground font-mono">{rotationAngle}° rotation</span>
-                <button onClick={() => rotate(1)} className="p-2 rounded-lg bg-muted hover:bg-muted/80 text-foreground transition-colors">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground font-mono">{rotationAngle}°</span>
+                  <div className="w-24 h-1.5 rounded-full bg-muted overflow-hidden">
+                    <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${((rotationAngle % 360 + 360) % 360) / 360 * 100}%` }} />
+                  </div>
+                  <span className="text-xs text-muted-foreground">360°</span>
+                </div>
+                <button onClick={() => rotate(1)} className="p-2.5 rounded-lg bg-muted hover:bg-muted/80 text-foreground transition-colors border border-border">
                   <RotateCcw className="w-4 h-4 -scale-x-100" />
                 </button>
               </div>
 
               <div
-                className="relative max-w-lg mx-auto rounded-xl overflow-hidden cursor-crosshair border-2 border-border"
+                className="relative max-w-lg mx-auto rounded-xl overflow-hidden cursor-crosshair border-2 border-border bg-muted"
                 onClick={handleImageClick}
               >
                 <img
@@ -329,10 +353,7 @@ const PropertyProof = () => {
                     Tap & hold the marker to verify PIN • Tap image to reposition
                   </p>
                   <button
-                    onClick={() => {
-                      setView("listing");
-                      setMarkerPos(null);
-                    }}
+                    onClick={() => { setView("listing"); setMarkerPos(null); }}
                     className="px-6 py-3 rounded-lg bg-success text-success-foreground font-semibold text-sm hover:bg-success/90 transition-colors"
                   >
                     <Check className="w-4 h-4 inline mr-2" />
