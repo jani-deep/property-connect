@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Fingerprint, Camera, Check, Sparkles, Plus, Package, ChevronLeft } from "lucide-react";
+import { Fingerprint, Camera, Check, Sparkles, Plus, Package, ChevronLeft, Upload, ImageIcon } from "lucide-react";
 import DemoLayout from "@/components/DemoLayout";
 import Asset360Viewer from "@/components/Asset360Viewer";
 import demoWatch from "@/assets/demo-watch.jpg";
@@ -20,7 +20,7 @@ import demoPhoneSide from "@/assets/demo-phone-side.jpg";
 import demoPhoneBack from "@/assets/demo-phone-back.jpg";
 import demoKeys from "@/assets/demo-keys.jpg";
 
-type View = "listing" | "capture" | "captured" | "analyzing" | "results" | "dna-select" | "dna-place";
+type View = "listing" | "capture" | "uploading" | "captured" | "analyzing" | "results" | "dna-select" | "dna-place";
 
 const allAssets = [
   {
@@ -98,12 +98,28 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
   const [markerPos, setMarkerPos] = useState<{ x: number; y: number } | null>(null);
   const [markerActive, setMarkerActive] = useState(false);
   const [analyzeProgress, setAnalyzeProgress] = useState(0);
-
+  const [uploadProgress, setUploadProgress] = useState(0);
   const item = allAssets[selectedItem];
 
   const handleCapture = (idx: number) => {
     setSelectedItem(idx);
     setView("captured");
+  };
+
+  const handleUpload = (idx: number) => {
+    setSelectedItem(idx);
+    setUploadProgress(0);
+    setView("uploading");
+    const interval = setInterval(() => {
+      setUploadProgress((p) => {
+        if (p >= 100) {
+          clearInterval(interval);
+          setTimeout(() => setView("captured"), 300);
+          return 100;
+        }
+        return p + 5;
+      });
+    }, 40);
   };
 
   const startAnalysis = () => {
@@ -199,12 +215,33 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
                 <ChevronLeft className="w-3.5 h-3.5" /> Back to Assets
               </button>
               <h2 className="text-lg font-bold text-foreground mb-1 text-center">Add New Asset</h2>
-              <p className="text-xs text-muted-foreground text-center mb-6">Select an item to see AI analysis</p>
+              <p className="text-xs text-muted-foreground text-center mb-5">Upload a photo or select a demo item</p>
+
+              {/* Upload Area */}
+              <button
+                onClick={() => handleUpload(Math.floor(Math.random() * allAssets.length))}
+                className="w-full glass-card p-6 mb-5 flex flex-col items-center gap-3 active:scale-[0.98] transition-transform border-2 border-dashed border-primary/30 hover:border-primary/60"
+              >
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Upload className="w-6 h-6 text-primary" />
+                </div>
+                <div className="text-center">
+                  <div className="text-sm font-semibold text-foreground">Upload Photo</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">Take a photo or choose from gallery</div>
+                </div>
+                <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+                  <span className="flex items-center gap-1"><Camera className="w-3 h-3" /> Camera</span>
+                  <span className="text-border">|</span>
+                  <span className="flex items-center gap-1"><ImageIcon className="w-3 h-3" /> Gallery</span>
+                </div>
+              </button>
+
+              <h3 className="text-xs font-semibold text-muted-foreground mb-3">Or select a demo item</h3>
               <div className="grid grid-cols-2 gap-3">
                 {allAssets.map((it, i) => (
                   <button
                     key={i}
-                    onClick={() => handleCapture(i)}
+                    onClick={() => handleUpload(i)}
                     className="glass-card p-3 active:scale-[0.98] transition-transform text-left"
                   >
                     <div className="aspect-square rounded-lg overflow-hidden mb-2 bg-muted border border-border">
@@ -217,6 +254,36 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
                     </div>
                   </button>
                 ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* UPLOADING */}
+          {view === "uploading" && (
+            <motion.div key="uploading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center">
+              <div className="glass-card p-6">
+                <div className="w-20 h-20 mx-auto mb-4 rounded-xl overflow-hidden border-2 border-primary/30 bg-muted">
+                  <img src={item.img} alt={item.model} className="w-full h-full object-cover" />
+                </div>
+                <h3 className="text-base font-semibold text-foreground mb-1">Uploading Image...</h3>
+                <p className="text-xs text-muted-foreground mb-5">{item.brand} {item.model}</p>
+                <div className="space-y-2 text-left text-xs mb-5">
+                  {[
+                    { label: "Compressing image", t: 20 },
+                    { label: "Uploading to server", t: 50 },
+                    { label: "Processing complete", t: 85 },
+                  ].map((task) => (
+                    <div key={task.label} className="flex items-center gap-2.5">
+                      <div className={`w-4 h-4 rounded-full flex items-center justify-center ${uploadProgress >= task.t ? "bg-success text-success-foreground" : "bg-muted"}`}>
+                        {uploadProgress >= task.t && <Check className="w-2.5 h-2.5" />}
+                      </div>
+                      <span className={uploadProgress >= task.t ? "text-foreground" : "text-muted-foreground"}>{task.label}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="match-bar">
+                  <div className="match-bar-fill bg-primary" style={{ width: `${uploadProgress}%` }} />
+                </div>
               </div>
             </motion.div>
           )}
