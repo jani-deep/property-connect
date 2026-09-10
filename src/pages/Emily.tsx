@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ImagePlus, Send, X, RotateCcw, Package, Check } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import DemoLayout from "@/components/DemoLayout";
 import emilyAvatar from "@/assets/emily-avatar.png";
 import { loadChat, saveChat, clearChat, saveRecord, type PropertyRecord } from "@/lib/propertyRecord";
@@ -31,6 +31,7 @@ const renderRichText = (text: string) => {
 };
 
 const Emily = ({ onLogout }: { onLogout?: () => void }) => {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     const saved = loadChat();
     return saved.length ? (saved as ChatMessage[]) : [{ role: "assistant", text: GREETING }];
@@ -82,6 +83,7 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
       };
       saveRecord(record);
       setSavedRecord(record);
+      setTimeout(() => navigate("/"), 2500);
     } catch {
       /* ignore malformed block */
     }
