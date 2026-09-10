@@ -4,7 +4,7 @@ import { ImagePlus, Send, X, RotateCcw, Package, Check } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import DemoLayout from "@/components/DemoLayout";
 import emilyAvatar from "@/assets/emily-avatar.png";
-import { loadChat, saveChat, clearChat, saveRecord, type PropertyRecord } from "@/lib/propertyRecord";
+import { loadChat, saveChat, clearChat, saveRecord, isChatComplete, markChatComplete, type PropertyRecord } from "@/lib/propertyRecord";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -34,7 +34,10 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     const saved = loadChat();
-    return saved.length ? (saved as ChatMessage[]) : [{ role: "assistant", text: GREETING }];
+    // Resume mid-flow only; a completed registration starts a fresh chat
+    if (saved.length && !isChatComplete()) return saved as ChatMessage[];
+    if (saved.length) clearChat();
+    return [{ role: "assistant", text: GREETING }];
   });
   const [input, setInput] = useState("");
   const [pendingImage, setPendingImage] = useState<string | null>(null);
@@ -82,8 +85,9 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
         registeredAt: new Date().toISOString(),
       };
       saveRecord(record);
+      markChatComplete();
       setSavedRecord(record);
-      setTimeout(() => navigate("/"), 2500);
+      setTimeout(() => navigate("/"), 4000);
     } catch {
       /* ignore malformed block */
     }
@@ -242,10 +246,11 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
             </div>
             <Link
               to="/property-proof"
-              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-xs"
+              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-xs mb-2"
             >
-              <Package className="w-3.5 h-3.5" /> View in My Property
+              <Package className="w-3.5 h-3.5" /> Go to My Properties
             </Link>
+            <p className="text-center text-[10px] text-muted-foreground">Taking you to Home in a moment…</p>
           </motion.div>
         )}
         <div ref={bottomRef} />
