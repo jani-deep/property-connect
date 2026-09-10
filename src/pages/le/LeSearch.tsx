@@ -82,6 +82,21 @@ const LeSearch = () => {
   const [revealPin, setRevealPin] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+      setPhoto(reader.result as string);
+      setStage("captured");
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
 
   const stopCamera = () => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
