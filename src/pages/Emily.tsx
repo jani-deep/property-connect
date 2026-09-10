@@ -4,6 +4,7 @@ import { Sparkles, Camera, Check, Fingerprint, Shield, Upload, ArrowRight, Shiel
 import DemoLayout from "@/components/DemoLayout";
 import Asset360Viewer from "@/components/Asset360Viewer";
 import { saveRecord, DnaLocation } from "@/lib/propertyRecord";
+import emilyAvatar from "@/assets/emily-avatar.png";
 import demoCar from "@/assets/demo-car.jpg";
 import demoCarSide from "@/assets/demo-car-side.jpg";
 import demoCarBack from "@/assets/demo-car-back.jpg";
