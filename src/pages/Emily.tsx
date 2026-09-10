@@ -131,7 +131,7 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
   };
 
   return (
-    <DemoLayout title="Emily – AI Guide" subtitle="Guided registration & DNA placement" icon={<img src={emilyAvatar} alt="Emily AI" className="w-full h-full object-cover object-top rounded-full" />} onLogout={onLogout}>
+    <DemoLayout title="Emily – AI Guide" subtitle="Guided registration & DNA placement" icon={<span className="block w-8 h-8 rounded-full overflow-hidden ring-1 ring-primary/30 bg-primary/10"><img src={emilyAvatar} alt="Emily AI" className="w-full h-full object-cover object-top" /></span>} onLogout={onLogout}>
       <div className="px-4 py-4">
         <AnimatePresence mode="wait">
           {step === "intro" && (
