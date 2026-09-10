@@ -175,7 +175,7 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
             <motion.div key="listing" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-lg font-bold text-foreground">My Assets</h2>
+                  <h2 className="text-lg font-bold text-foreground">My Property</h2>
                   <p className="text-xs text-muted-foreground">{assets.length} items registered</p>
                 </div>
                 <button

@@ -19,6 +19,17 @@ const REGISTER_RE = /\[\[REGISTER\]\]\s*(\{[\s\S]*\})/;
 
 const stripRegisterBlock = (text: string) => text.replace(/\[\[REGISTER\]\][\s\S]*$/, "").trim();
 
+/** Render **bold** as actual <strong> instead of literal asterisks. */
+const renderRichText = (text: string) => {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
+      return <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>;
+    }
+    return <span key={i}>{part}</span>;
+  });
+};
+
 const Emily = ({ onLogout }: { onLogout?: () => void }) => {
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     const saved = loadChat();
@@ -200,7 +211,7 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
                 <img src={emilyAvatar} alt="Emily AI" className="w-full h-full object-cover object-top" />
               </div>
               <div className="glass-card px-3 py-2 text-xs text-foreground leading-relaxed whitespace-pre-wrap max-w-[80%]">
-                {m.text || (busy && i === messages.length - 1 ? "Emily is typing…" : "")}
+                {renderRichText(m.text || (busy && i === messages.length - 1 ? "Emily is typing…" : ""))}
               </div>
             </motion.div>
           ) : (
@@ -219,7 +230,7 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-3">
             <div className="flex items-center gap-2 text-success mb-2">
               <Check className="w-3.5 h-3.5" />
-              <span className="text-xs font-semibold">Saved to My Assets</span>
+              <span className="text-xs font-semibold">Saved to My Property</span>
             </div>
             <div className="text-xs font-semibold text-foreground">{savedRecord.item}</div>
             <div className="text-[10px] text-muted-foreground mb-1">{savedRecord.category}</div>
@@ -231,7 +242,7 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
               to="/property-proof"
               className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-xs"
             >
-              <Package className="w-3.5 h-3.5" /> View in My Assets
+              <Package className="w-3.5 h-3.5" /> View in My Property
             </Link>
           </motion.div>
         )}
