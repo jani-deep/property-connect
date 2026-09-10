@@ -19,6 +19,7 @@ import demoPhone from "@/assets/demo-phone.jpg";
 import demoPhoneSide from "@/assets/demo-phone-side.jpg";
 import demoPhoneBack from "@/assets/demo-phone-back.jpg";
 import demoKeys from "@/assets/demo-keys.jpg";
+import { loadRecords } from "@/lib/propertyRecord";
 
 type View = "listing" | "capture" | "uploading" | "captured" | "analyzing" | "results" | "dna-select" | "dna-place";
 
@@ -114,7 +115,8 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
   const [markerActive, setMarkerActive] = useState(false);
   const [analyzeProgress, setAnalyzeProgress] = useState(0);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const item = allAssets[selectedItem];
+  const assets = [...emilyAssets, ...allAssets];
+  const item = assets[selectedItem];
 
   const handleCapture = (idx: number) => {
     setSelectedItem(idx);
@@ -174,7 +176,7 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h2 className="text-lg font-bold text-foreground">My Assets</h2>
-                  <p className="text-xs text-muted-foreground">{allAssets.length} items registered</p>
+                  <p className="text-xs text-muted-foreground">{assets.length} items registered</p>
                 </div>
                 <button
                   onClick={() => setView("capture")}
@@ -185,7 +187,7 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
                 </button>
               </div>
               <div className="space-y-2">
-                {allAssets.map((asset, i) => (
+                {assets.map((asset, i) => (
                   <motion.div
                     key={i}
                     initial={{ opacity: 0, y: 10 }}
@@ -234,7 +236,7 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
 
               {/* Upload Area */}
               <button
-                onClick={() => handleUpload(Math.floor(Math.random() * allAssets.length))}
+                onClick={() => handleUpload(emilyAssets.length + Math.floor(Math.random() * allAssets.length))}
                 className="w-full glass-card p-6 mb-5 flex flex-col items-center gap-3 active:scale-[0.98] transition-transform border-2 border-dashed border-primary/30 hover:border-primary/60"
               >
                 <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
@@ -253,10 +255,10 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
 
               <h3 className="text-xs font-semibold text-muted-foreground mb-3">Or select a demo item</h3>
               <div className="grid grid-cols-2 gap-3">
-                {allAssets.map((it, i) => (
+                {allAssets.map((it, ai) => (
                   <button
                     key={i}
-                    onClick={() => handleUpload(i)}
+                    onClick={() => handleUpload(emilyAssets.length + ai)}
                     className="glass-card p-3 active:scale-[0.98] transition-transform text-left"
                   >
                     <div className="aspect-square rounded-lg overflow-hidden mb-2 bg-muted border border-border">
