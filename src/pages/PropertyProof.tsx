@@ -257,7 +257,7 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
               <div className="grid grid-cols-2 gap-3">
                 {allAssets.map((it, ai) => (
                   <button
-                    key={i}
+                    key={ai}
                     onClick={() => handleUpload(emilyAssets.length + ai)}
                     className="glass-card p-3 active:scale-[0.98] transition-transform text-left"
                   >
