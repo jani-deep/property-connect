@@ -199,11 +199,10 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
                     transition={{ delay: i * 0.05 }}
                     className="glass-card p-3 flex items-center gap-3 active:scale-[0.98] transition-transform cursor-pointer"
                     onClick={() => {
-                      if ((asset as any).viaEmily && (asset as any).draft) {
-                        navigate("/emily");
+                      if ((asset as any).viaEmily) {
+                        navigate(`/property/${(asset as any).pin}`);
                       } else {
-                        setSelectedItem(i);
-                        setView("dna-select");
+                        navigate(`/property/demo-${i - emilyAssets.length}`);
                       }
                     }}
                   >
