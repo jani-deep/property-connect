@@ -19,6 +19,8 @@ export interface PropertyRecord {
   dnaLocations: DnaLocation[];
   score: number;
   registeredAt: string;
+  /** "draft" = image + description confirmed but registration not finished */
+  status?: "draft" | "protected";
 }
 
 const KEY = "propertyproof.records";
