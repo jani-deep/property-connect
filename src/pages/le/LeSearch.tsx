@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, ScanLine, Check, Fingerprint, AlertTriangle, ShieldCheck, User, MapPin, RefreshCw, Lock } from "lucide-react";
+import { Camera, ScanLine, Check, Fingerprint, AlertTriangle, ShieldCheck, User, MapPin, RefreshCw, Lock, Image as ImageIcon } from "lucide-react";
 import { findByPin, PropertyRecord } from "@/lib/propertyRecord";
 import { maskPhone, maskSerial, maskPin } from "@/lib/mask";
 import demoCar from "@/assets/demo-car.jpg";
@@ -82,6 +82,21 @@ const LeSearch = () => {
   const [revealPin, setRevealPin] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+      setPhoto(reader.result as string);
+      setStage("captured");
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
 
   const stopCamera = () => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -131,25 +146,23 @@ const LeSearch = () => {
         if (p >= 100) {
           clearInterval(iv);
           const live = findByPin("FL-DNA-3301-VK");
-          setMatches(
+          setMatches([
             live
-              ? [
-                  {
-                    ...demoMatches[0],
-                    owner: live.owner || demoMatches[0].owner,
-                    phone: live.phone || demoMatches[0].phone,
-                    county: live.county || demoMatches[0].county,
-                    item: live.item || demoMatches[0].item,
-                    serial: live.serial || demoMatches[0].serial,
-                    serialLabel: live.serialLabel || "Serial",
-                    img: live.img || demoMatches[0].img,
-                    value: live.value || demoMatches[0].value,
-                    dna: live.dnaLocations?.length ? live.dnaLocations : demoMatches[0].dna,
-                  },
-                  demoMatches[1],
-                ]
-              : demoMatches
-          );
+              ? {
+                  ...demoMatches[0],
+                  owner: live.owner || demoMatches[0].owner,
+                  phone: live.phone || demoMatches[0].phone,
+                  county: live.county || demoMatches[0].county,
+                  item: live.item || demoMatches[0].item,
+                  serial: live.serial || demoMatches[0].serial,
+                  serialLabel: live.serialLabel || "Serial",
+                  img: live.img || demoMatches[0].img,
+                  value: live.value || demoMatches[0].value,
+                  dna: live.dnaLocations?.length ? live.dnaLocations : demoMatches[0].dna,
+                }
+              : demoMatches[0],
+          ]);
+          setSelected(0);
           setTimeout(() => setStage("results"), 400);
           return 100;
         }
@@ -201,9 +214,16 @@ const LeSearch = () => {
               >
                 <Camera className="w-4 h-4" /> Take Picture
               </button>
+              <button
+                onClick={() => fileRef.current?.click()}
+                className="px-4 py-3 rounded-lg bg-muted text-foreground text-sm font-semibold flex items-center gap-2"
+              >
+                <ImageIcon className="w-4 h-4" /> Upload from Gallery
+              </button>
               <button onClick={startCamera} className="px-4 py-3 rounded-lg bg-muted text-foreground text-sm font-semibold flex items-center gap-2">
                 <RefreshCw className="w-4 h-4" /> Retry Camera
               </button>
+              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onPickFile} />
             </div>
           </motion.div>
         )}
