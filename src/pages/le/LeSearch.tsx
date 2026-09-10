@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, ScanLine, Check, Fingerprint, AlertTriangle, ShieldCheck, User, MapPin, RefreshCw, Lock } from "lucide-react";
+import { Camera, ScanLine, Check, Fingerprint, AlertTriangle, ShieldCheck, User, MapPin, RefreshCw, Lock, Image as ImageIcon } from "lucide-react";
 import { findByPin, PropertyRecord } from "@/lib/propertyRecord";
 import { maskPhone, maskSerial, maskPin } from "@/lib/mask";
 import demoCar from "@/assets/demo-car.jpg";
