@@ -94,6 +94,21 @@ const allAssets = [
 const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
   const [view, setView] = useState<View>("listing");
   const [selectedItem, setSelectedItem] = useState(0);
+  const [emilyAssets] = useState(() =>
+    loadRecords().map((r) => ({
+      img: r.img || demoKeys,
+      images: [r.img || demoKeys],
+      brand: "",
+      model: r.item,
+      category: r.category,
+      serial: r.serial,
+      value: r.value,
+      registered: true,
+      dnaPlaced: r.dnaLocations.length > 0,
+      viaEmily: true as const,
+      pin: r.pin,
+    }))
+  );
   const [dnaPin] = useState("FL-DNA-7829-AX");
   const [markerPos, setMarkerPos] = useState<{ x: number; y: number } | null>(null);
   const [markerActive, setMarkerActive] = useState(false);
