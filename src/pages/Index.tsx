@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Shield, ArrowRight, Fingerprint, ChevronRight, Search, Building2, Sparkles } from "lucide-react";
+import { Shield, ArrowRight, Fingerprint, ChevronRight, Search, Building2 } from "lucide-react";
 import MobileHeader from "@/components/MobileHeader";
+import emilyAvatar from "@/assets/emily-avatar.png";
 import BottomNav from "@/components/BottomNav";
 
 const pillars = [
@@ -81,8 +82,8 @@ const Index = ({ onLogout }: { onLogout?: () => void }) => {
           <Link to="/emily" className="block">
             <div className="pillar-card border-primary/30">
               <div className="flex items-start gap-3 mb-3">
-                <div className="p-2.5 rounded-xl bg-primary/10 text-primary flex-shrink-0">
-                  <Sparkles className="w-6 h-6" />
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-b from-primary/20 to-accent/10 overflow-hidden flex-shrink-0 ring-1 ring-primary/20">
+                  <img src={emilyAvatar} alt="Emily — AI guide" className="w-full h-full object-cover object-top" loading="lazy" width={768} height={768} />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">

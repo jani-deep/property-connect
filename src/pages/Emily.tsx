@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Camera, Check, Fingerprint, Shield, Upload, ArrowRight, ShieldCheck } from "lucide-react";
+import { Camera, Check, Fingerprint, Shield, Upload, ArrowRight, ShieldCheck } from "lucide-react";
 import DemoLayout from "@/components/DemoLayout";
 import Asset360Viewer from "@/components/Asset360Viewer";
 import { saveRecord, DnaLocation } from "@/lib/propertyRecord";
+import emilyAvatar from "@/assets/emily-avatar.png";
 import demoCar from "@/assets/demo-car.jpg";
 import demoCarSide from "@/assets/demo-car-side.jpg";
 import demoCarBack from "@/assets/demo-car-back.jpg";
@@ -67,8 +68,8 @@ type Step = "intro" | "upload" | "recognize" | "owner" | "identifiers" | "recomm
 
 const Bubble = ({ children }: { children: React.ReactNode }) => (
   <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex gap-2 mb-3">
-    <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-      <Sparkles className="w-3.5 h-3.5 text-primary" />
+    <div className="w-7 h-7 rounded-full bg-primary/10 overflow-hidden flex-shrink-0 ring-1 ring-primary/20">
+      <img src={emilyAvatar} alt="Emily AI" className="w-full h-full object-cover object-top" loading="lazy" />
     </div>
     <div className="glass-card px-3 py-2 text-xs text-foreground leading-relaxed">{children}</div>
   </motion.div>
@@ -130,14 +131,14 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
   };
 
   return (
-    <DemoLayout title="Emily – AI Guide" subtitle="Guided registration & DNA placement" icon={<Sparkles className="w-5 h-5 text-primary" />} onLogout={onLogout}>
+    <DemoLayout title="Emily – AI Guide" subtitle="Guided registration & DNA placement" icon={<span className="block w-8 h-8 rounded-full overflow-hidden ring-1 ring-primary/30 bg-primary/10"><img src={emilyAvatar} alt="Emily AI" className="w-full h-full object-cover object-top" /></span>} onLogout={onLogout}>
       <div className="px-4 py-4">
         <AnimatePresence mode="wait">
           {step === "intro" && (
             <motion.div key="intro" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <div className="glass-card p-5 text-center mb-4">
-                <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Sparkles className="w-7 h-7 text-primary" />
+                <div className="w-24 h-24 mx-auto mb-3 rounded-full bg-gradient-to-b from-primary/20 to-accent/10 overflow-hidden ring-2 ring-primary/20 shadow-lg">
+                  <img src={emilyAvatar} alt="Emily — your AI guide" className="w-full h-full object-cover object-top" loading="lazy" width={768} height={768} />
                 </div>
                 <h2 className="text-lg font-bold text-foreground mb-1">Hi, I'm Emily</h2>
                 <p className="text-xs text-muted-foreground">
