@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { ImagePlus, Send, X, RotateCcw, Package, Check } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { ImagePlus, Send, X, RotateCcw, Package, Check, Mic, MicOff, Volume2, VolumeX, Play } from "lucide-react";
+import { Link } from "react-router-dom";
 import DemoLayout from "@/components/DemoLayout";
 import emilyAvatar from "@/assets/emily-avatar.png";
 import { loadChat, saveChat, clearChat, saveRecord, isChatComplete, markChatComplete, type PropertyRecord } from "@/lib/propertyRecord";
@@ -15,9 +15,11 @@ interface ChatMessage {
 const GREETING =
   "Hi, I'm Emily 👋 I'm your AI guide for protecting your property. Let's start simple — upload or snap a photo of the item you'd like to register, and I'll take it from there.";
 
-const REGISTER_RE = /\[\[REGISTER\]\]\s*(\{[\s\S]*\})/;
+const REGISTER_RE = /\[\[REGISTER\]\]\s*(\{[\s\S]*?\})/;
+const DRAFT_RE = /\[\[DRAFT\]\]\s*(\{[\s\S]*?\})/;
 
-const stripRegisterBlock = (text: string) => text.replace(/\[\[REGISTER\]\][\s\S]*$/, "").trim();
+const stripBlocks = (text: string) =>
+  text.replace(/\[\[REGISTER\]\][\s\S]*$/, "").replace(/\[\[DRAFT\]\][\s\S]*$/, "").trim();
 
 /** Render **bold** as actual <strong> instead of literal asterisks. */
 const renderRichText = (text: string) => {
@@ -30,11 +32,13 @@ const renderRichText = (text: string) => {
   });
 };
 
+/** Strip emoji / symbols so the spoken line stays natural. */
+const speakable = (text: string) =>
+  text.replace(/\*\*/g, "").replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "").trim();
+
 const Emily = ({ onLogout }: { onLogout?: () => void }) => {
-  const navigate = useNavigate();
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     const saved = loadChat();
-    // Resume mid-flow only; a completed registration starts a fresh chat
     if (saved.length && !isChatComplete()) return saved as ChatMessage[];
     if (saved.length) clearChat();
     return [{ role: "assistant", text: GREETING }];
@@ -43,9 +47,18 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [savedRecord, setSavedRecord] = useState<PropertyRecord | null>(null);
+  const [voiceOn, setVoiceOn] = useState(true);
+  const [speaking, setSpeaking] = useState(false);
+  const [needsTap, setNeedsTap] = useState(false);
+  const [listening, setListening] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastImageRef = useRef<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const recognitionRef = useRef<any>(null);
+  const greetedRef = useRef(false);
+
+  const isIntro = messages.length === 1 && messages[0].role === "assistant";
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -55,6 +68,93 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
     if (!busy) saveChat(messages);
   }, [messages, busy]);
 
+  /* ---------------- Emily's voice ---------------- */
+
+  const stopSpeaking = useCallback(() => {
+    audioRef.current?.pause();
+    audioRef.current = null;
+    setSpeaking(false);
+  }, []);
+
+  const speak = useCallback(async (text: string) => {
+    const line = speakable(text);
+    if (!line) return false;
+    try {
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/emily-tts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ text: line }),
+      });
+      if (!res.ok) throw new Error(await res.text().catch(() => "tts failed"));
+      const url = URL.createObjectURL(await res.blob());
+      stopSpeaking();
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => {
+        setSpeaking(false);
+        URL.revokeObjectURL(url);
+      };
+      setSpeaking(true);
+      await audio.play();
+      return true;
+    } catch {
+      setSpeaking(false);
+      return false;
+    }
+  }, [stopSpeaking]);
+
+  /* Speak the greeting once when the user lands on Emily */
+  useEffect(() => {
+    if (greetedRef.current || !isIntro || !voiceOn) return;
+    greetedRef.current = true;
+    speak(messages[0].text).then((ok) => {
+      if (!ok) setNeedsTap(true);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* ---------------- Voice input ---------------- */
+
+  const toggleListening = () => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) {
+      setInput((v) => v);
+      alert("Voice input isn't supported in this browser. Please type your reply.");
+      return;
+    }
+    if (listening) {
+      recognitionRef.current?.stop();
+      setListening(false);
+      return;
+    }
+    stopSpeaking();
+    const rec = new SR();
+    rec.lang = "en-US";
+    rec.interimResults = true;
+    rec.continuous = false;
+    let finalText = "";
+    rec.onresult = (e: any) => {
+      let interim = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const chunk = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalText += chunk;
+        else interim += chunk;
+      }
+      setInput((finalText + interim).trim());
+    };
+    rec.onerror = () => setListening(false);
+    rec.onend = () => setListening(false);
+    recognitionRef.current = rec;
+    setListening(true);
+    rec.start();
+  };
+
+  /* ---------------- Records ---------------- */
+
   const pickImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -62,6 +162,32 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
     reader.onload = () => setPendingImage(reader.result as string);
     reader.readAsDataURL(file);
     e.target.value = "";
+  };
+
+  const draftFromBlock = (raw: string) => {
+    const match = raw.match(DRAFT_RE);
+    if (!match) return;
+    try {
+      const d = JSON.parse(match[1]);
+      saveRecord({
+        pin: d.pin || `FL-DNA-${Math.floor(1000 + Math.random() * 9000)}-AX`,
+        item: d.item || "Item in registration",
+        category: d.category || "General Property",
+        owner: "—",
+        phone: "—",
+        county: "—",
+        serial: "—",
+        serialLabel: "Serial #",
+        value: d.value || "—",
+        img: lastImageRef.current || "",
+        dnaLocations: [],
+        score: Number(d.score) || 30,
+        registeredAt: new Date().toISOString(),
+        status: "draft",
+      });
+    } catch {
+      /* ignore malformed block */
+    }
   };
 
   const registerFromBlock = (raw: string) => {
@@ -83,24 +209,27 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
         dnaLocations: (d.dnaSpots || []).map((label: string) => ({ label, x: 0, y: 0, applied: true })),
         score: Number(d.score) || 85,
         registeredAt: new Date().toISOString(),
+        status: "protected",
       };
       saveRecord(record);
       markChatComplete();
       setSavedRecord(record);
-      setTimeout(() => navigate("/"), 4000);
     } catch {
       /* ignore malformed block */
     }
   };
 
   const resetChat = () => {
+    stopSpeaking();
     clearChat();
     setSavedRecord(null);
     setMessages([{ role: "assistant", text: GREETING }]);
+    if (voiceOn) speak(GREETING);
   };
 
   const send = async () => {
     if (busy || (!input.trim() && !pendingImage)) return;
+    stopSpeaking();
     const userMsg: ChatMessage = {
       role: "user",
       text: input.trim() || "Here's a photo of my item.",
@@ -153,7 +282,7 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
               acc += evt.delta;
               setMessages((m) => {
                 const copy = [...m];
-                copy[copy.length - 1] = { role: "assistant", text: stripRegisterBlock(acc) };
+                copy[copy.length - 1] = { role: "assistant", text: stripBlocks(acc) };
                 return copy;
               });
             }
@@ -173,7 +302,9 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
           return copy;
         });
       } else {
+        draftFromBlock(acc);
         registerFromBlock(acc);
+        if (voiceOn) speak(stripBlocks(acc));
       }
     } catch {
       setMessages((m) => {
@@ -200,7 +331,18 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
       }
       onLogout={onLogout}
     >
-      <div className="px-4 py-3 flex justify-end">
+      <div className="px-4 py-3 flex items-center justify-between">
+        <button
+          onClick={() => {
+            const next = !voiceOn;
+            setVoiceOn(next);
+            if (!next) stopSpeaking();
+          }}
+          className="inline-flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground"
+        >
+          {voiceOn ? <Volume2 className="w-3 h-3 text-primary" /> : <VolumeX className="w-3 h-3" />}
+          {voiceOn ? "Voice on" : "Voice off"}
+        </button>
         <button
           onClick={resetChat}
           className="inline-flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground"
@@ -209,7 +351,41 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
         </button>
       </div>
 
-      <div className="px-4 space-y-3 pb-32">
+      {/* Intro: Emily front and centre */}
+      {isIntro && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center px-6 pt-4 pb-2"
+        >
+          <motion.div
+            animate={speaking ? { scale: [1, 1.04, 1] } : { scale: 1 }}
+            transition={speaking ? { repeat: Infinity, duration: 1.4 } : { duration: 0.3 }}
+            className={`w-28 h-28 rounded-full overflow-hidden bg-primary/10 ring-2 ${
+              speaking ? "ring-primary shadow-[0_0_28px_hsl(var(--primary)/0.35)]" : "ring-primary/25"
+            }`}
+          >
+            <img src={emilyAvatar} alt="Emily, your AI guide" className="w-full h-full object-cover object-top" />
+          </motion.div>
+          <div className="mt-2 text-sm font-semibold text-foreground">Emily</div>
+          <div className="text-[10px] text-muted-foreground">
+            {speaking ? "Speaking…" : "Your AI property guide"}
+          </div>
+          {needsTap && !speaking && (
+            <button
+              onClick={() => {
+                setNeedsTap(false);
+                speak(messages[0].text);
+              }}
+              className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold"
+            >
+              <Play className="w-3 h-3" /> Tap to hear Emily
+            </button>
+          )}
+        </motion.div>
+      )}
+
+      <div className="px-4 space-y-3 pb-32 pt-2">
         {messages.map((m, i) =>
           m.role === "assistant" ? (
             <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex gap-2">
@@ -250,7 +426,12 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
             >
               <Package className="w-3.5 h-3.5" /> Go to My Properties
             </Link>
-            <p className="text-center text-[10px] text-muted-foreground">Taking you to Home in a moment…</p>
+            <button
+              onClick={resetChat}
+              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-muted text-foreground font-semibold text-xs"
+            >
+              <RotateCcw className="w-3.5 h-3.5" /> Protect another item
+            </button>
           </motion.div>
         )}
         <div ref={bottomRef} />
@@ -269,6 +450,11 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
             </button>
           </div>
         )}
+        {listening && (
+          <div className="mb-1.5 text-[10px] text-primary font-medium flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" /> Listening… speak now
+          </div>
+        )}
         <div className="flex items-end gap-2">
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={pickImage} />
           <button
@@ -277,6 +463,15 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
             className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0"
           >
             <ImagePlus className="w-4 h-4 text-primary" />
+          </button>
+          <button
+            onClick={toggleListening}
+            aria-label={listening ? "Stop voice input" : "Speak to Emily"}
+            className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
+              listening ? "bg-primary text-primary-foreground" : "bg-muted text-primary"
+            }`}
+          >
+            {listening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
           </button>
           <textarea
             value={input}
@@ -288,7 +483,7 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
               }
             }}
             rows={1}
-            placeholder="Message Emily…"
+            placeholder="Message or speak to Emily…"
             className="flex-1 resize-none px-3 py-2 rounded-lg bg-muted border border-border text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-ring max-h-24"
           />
           <button

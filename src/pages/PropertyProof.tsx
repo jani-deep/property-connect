@@ -105,9 +105,11 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
       serial: r.serial,
       value: r.value,
       registered: true,
-      dnaPlaced: r.dnaLocations.length > 0,
+      dnaPlaced: r.status !== "draft" && r.dnaLocations.length > 0,
       viaEmily: true as const,
       pin: r.pin,
+      score: r.score,
+      draft: r.status === "draft",
     }))
   );
   const [dnaPin] = useState("FL-DNA-7829-AX");
