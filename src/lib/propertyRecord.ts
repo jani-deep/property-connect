@@ -68,4 +68,13 @@ export const saveChat = (messages: StoredChatMessage[]) => {
   }
 };
 
-export const clearChat = () => localStorage.removeItem(CHAT_KEY);
+export const clearChat = () => {
+  localStorage.removeItem(CHAT_KEY);
+  localStorage.removeItem(CHAT_DONE_KEY);
+};
+
+/* Whether the saved chat finished a full registration (protected + saved) */
+const CHAT_DONE_KEY = "propertyproof.emily.done";
+
+export const isChatComplete = () => localStorage.getItem(CHAT_DONE_KEY) === "1";
+export const markChatComplete = () => localStorage.setItem(CHAT_DONE_KEY, "1");
