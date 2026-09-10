@@ -198,7 +198,14 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
                     className="glass-card p-3 flex items-center gap-3 active:scale-[0.98] transition-transform cursor-pointer"
-                    onClick={() => { setSelectedItem(i); setView("dna-select"); }}
+                    onClick={() => {
+                      if ((asset as any).viaEmily && (asset as any).draft) {
+                        navigate("/emily");
+                      } else {
+                        setSelectedItem(i);
+                        setView("dna-select");
+                      }
+                    }}
                   >
                     <div className="w-12 h-12 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-border">
                       <img src={asset.img} alt={asset.model} className="w-full h-full object-cover" />
