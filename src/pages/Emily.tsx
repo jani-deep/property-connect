@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Camera, Check, Fingerprint, Shield, Upload, ArrowRight, ShieldCheck } from "lucide-react";
+import { Camera, Check, Fingerprint, Shield, Upload, ArrowRight, ShieldCheck } from "lucide-react";
 import DemoLayout from "@/components/DemoLayout";
 import Asset360Viewer from "@/components/Asset360Viewer";
 import { saveRecord, DnaLocation } from "@/lib/propertyRecord";

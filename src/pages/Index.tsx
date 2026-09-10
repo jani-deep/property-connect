@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Shield, ArrowRight, Fingerprint, ChevronRight, Search, Building2, Sparkles } from "lucide-react";
+import { Shield, ArrowRight, Fingerprint, ChevronRight, Search, Building2 } from "lucide-react";
 import MobileHeader from "@/components/MobileHeader";
 import emilyAvatar from "@/assets/emily-avatar.png";
 import BottomNav from "@/components/BottomNav";
