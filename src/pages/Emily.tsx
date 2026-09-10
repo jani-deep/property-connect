@@ -132,7 +132,7 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
       }
       onLogout={onLogout}
     >
-      <div className="px-4 py-4 space-y-3">
+      <div className="px-4 py-4 space-y-3 pb-32">
         {messages.map((m, i) =>
           m.role === "assistant" ? (
             <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex gap-2">
