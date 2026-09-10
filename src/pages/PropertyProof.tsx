@@ -105,9 +105,11 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
       serial: r.serial,
       value: r.value,
       registered: true,
-      dnaPlaced: r.dnaLocations.length > 0,
+      dnaPlaced: r.status !== "draft" && r.dnaLocations.length > 0,
       viaEmily: true as const,
       pin: r.pin,
+      score: r.score,
+      draft: r.status === "draft",
     }))
   );
   const [dnaPin] = useState("FL-DNA-7829-AX");
@@ -202,9 +204,26 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
                     <div className="flex-1 min-w-0">
                       <div className="text-xs font-semibold text-foreground truncate">{asset.brand} {asset.model}</div>
                       <div className="text-[10px] text-muted-foreground truncate">{asset.category}</div>
+                      {"score" in asset && typeof (asset as any).score === "number" && (
+                        <div className="mt-1 flex items-center gap-1.5">
+                          <div className="h-1 w-16 rounded-full bg-muted overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${(asset as any).draft ? "bg-warning" : "bg-success"}`}
+                              style={{ width: `${(asset as any).score}%` }}
+                            />
+                          </div>
+                          <span className="text-[9px] text-muted-foreground">
+                            {(asset as any).score}/100 {(asset as any).draft ? "· incomplete" : "· protected"}
+                          </span>
+                        </div>
+                      )}
                     </div>
                     <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                      {asset.dnaPlaced ? (
+                      {(asset as any).draft ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning/10 text-warning text-[10px] font-medium">
+                          <Package className="w-2.5 h-2.5" /> Incomplete
+                        </span>
+                      ) : asset.dnaPlaced ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success/10 text-success text-[10px] font-medium">
                           <Fingerprint className="w-2.5 h-2.5" /> DNA
                         </span>
