@@ -1,13 +1,36 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Camera, User, MapPin, AlertTriangle, Shield, Check, Fingerprint, Clock } from "lucide-react";
+import { Search, Camera, User, MapPin, AlertTriangle, Shield, Check, Fingerprint, Clock, ScanLine, FlipHorizontal, Lock, ShieldCheck } from "lucide-react";
 import DemoLayout from "@/components/DemoLayout";
+import { findByPin, PropertyRecord } from "@/lib/propertyRecord";
 import demoWatch from "@/assets/demo-watch.jpg";
 import demoLaptop from "@/assets/demo-laptop.jpg";
 import demoCamera from "@/assets/demo-camera.jpg";
 import demoCar from "@/assets/demo-car.jpg";
 
-type Step = "home" | "captured" | "searching" | "results" | "detail";
+type Step = "home" | "captured" | "searching" | "results" | "detail" | "reader" | "record";
+
+const fallbackRecords: Record<string, PropertyRecord> = {
+  "FL-DNA-3301-VK": {
+    pin: "FL-DNA-3301-VK",
+    item: "BMW 5 Series 530i xDrive",
+    category: "Vehicle",
+    owner: "John Smith",
+    phone: "+1 (555) 000-0000",
+    county: "Brevard County",
+    serial: "WBA53BJ09RWC18294",
+    serialLabel: "VIN",
+    value: "$62,400",
+    img: demoCar,
+    score: 96,
+    registeredAt: "Today, 9:12 AM",
+    dnaLocations: [
+      { label: "Driver door frame", x: 24, y: 55, applied: true },
+      { label: "Windshield lower corner", x: 52, y: 38, applied: true },
+      { label: "Rear bumper inner lip", x: 78, y: 68, applied: true },
+    ],
+  },
+};
 
 const searchHistory = [
   { img: demoCar, label: "BMW 5 Series – Sedan", date: "Today, 2:15 PM" },
@@ -36,6 +59,27 @@ const LawEnforcement = ({ onLogout }: { onLogout?: () => void }) => {
   const [searchImage, setSearchImage] = useState(demoWatch);
   const [searchLabel, setSearchLabel] = useState("Rolex Submariner – Watch");
   const [useCarMatchesFlag, setUseCarMatchesFlag] = useState(false);
+  const [readerStage, setReaderStage] = useState(0); // 0 locating, 1 mirrored, 2 transmitting, 3 validated
+  const [flipped, setFlipped] = useState(false);
+  const [readerPin, setReaderPin] = useState("FL-DNA-3301-VK");
+  const [record, setRecord] = useState<PropertyRecord | null>(null);
+
+  const startReader = () => {
+    setStep("reader");
+    setReaderStage(0);
+    setFlipped(false);
+    setTimeout(() => setReaderStage(1), 1800);
+  };
+
+  const transmitPin = () => {
+    setReaderStage(2);
+    setTimeout(() => {
+      const found = findByPin(readerPin) || fallbackRecords[readerPin.toUpperCase()] || null;
+      setRecord(found);
+      setReaderStage(3);
+      setTimeout(() => setStep("record"), 700);
+    }, 1600);
+  };
 
   const handleCapture = (img: string, label: string, isCarMatch: boolean) => {
     setSearchImage(img);
@@ -79,6 +123,18 @@ const LawEnforcement = ({ onLogout }: { onLogout?: () => void }) => {
                   Capture & Search
                 </button>
               </div>
+
+              <button onClick={startReader} className="w-full glass-card p-4 flex items-center gap-3 text-left mb-6 active:scale-[0.98] transition-transform border-primary/30">
+                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <ScanLine className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-semibold text-foreground">Microdot Reader</div>
+                  <div className="text-[10px] text-muted-foreground">Read the etched DNA PIN and pull the verified owner record</div>
+                </div>
+                <Fingerprint className="w-4 h-4 text-primary flex-shrink-0" />
+              </button>
+
 
               <h3 className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-muted-foreground" />
@@ -289,6 +345,153 @@ const LawEnforcement = ({ onLogout }: { onLogout?: () => void }) => {
                   </div>
                 ))}
               </div>
+            </motion.div>
+          )}
+
+          {/* MICRODOT READER */}
+          {step === "reader" && (
+            <motion.div key="reader" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+              <button onClick={() => setStep("home")} className="text-xs text-muted-foreground mb-4 inline-block">← Back</button>
+
+              <div className="glass-card p-4 mb-3">
+                <div className="flex items-center gap-2 text-primary mb-3">
+                  <ScanLine className="w-4 h-4" />
+                  <span className="text-xs font-semibold">Microdot Reader</span>
+                </div>
+                <div className="relative rounded-xl overflow-hidden border-2 border-border bg-foreground/90 aspect-square flex items-center justify-center">
+                  <div className="absolute inset-6 border-2 border-primary/60 rounded-full" />
+                  {readerStage === 0 ? (
+                    <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.2 }} className="text-primary text-xs font-mono">
+                      Locating microdot…
+                    </motion.div>
+                  ) : (
+                    <div
+                      className="font-mono text-primary text-base font-bold tracking-widest transition-transform duration-500"
+                      style={{ transform: flipped ? "scaleX(1)" : "scaleX(-1)" }}
+                    >
+                      {readerPin}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {readerStage >= 1 && readerStage < 2 && (
+                <>
+                  <div className="glass-card p-4 mb-3">
+                    <p className="text-xs text-muted-foreground mb-3">
+                      {flipped
+                        ? "PIN corrected and readable. You can now transmit it securely to PropertyProof."
+                        : "The microdot is etched in reverse. Flip the image digitally to read the PIN."}
+                    </p>
+                    <button onClick={() => setFlipped(!flipped)} className="w-full px-4 py-2.5 rounded-lg bg-muted text-foreground font-semibold text-xs flex items-center justify-center gap-2">
+                      <FlipHorizontal className="w-4 h-4" /> {flipped ? "Un-flip image" : "Flip image digitally"}
+                    </button>
+                  </div>
+                  <div className="glass-card p-4">
+                    <label className="text-[10px] text-muted-foreground mb-1 block">DNA PIN read</label>
+                    <input
+                      value={readerPin}
+                      onChange={(e) => setReaderPin(e.target.value.toUpperCase())}
+                      className="w-full px-3 py-2.5 rounded-lg bg-muted border border-border font-mono text-xs text-foreground mb-3 focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <button
+                      disabled={!flipped}
+                      onClick={transmitPin}
+                      className="w-full px-4 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-xs flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      <Lock className="w-4 h-4" /> Send PIN via secure API
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {readerStage >= 2 && (
+                <div className="glass-card p-4 space-y-2.5 text-xs">
+                  {[
+                    ["Encrypting PIN payload", true],
+                    ["Transmitting to PropertyProof API", true],
+                    ["Validating PIN against registry", readerStage === 3],
+                    ["Authorizing officer credentials", readerStage === 3],
+                  ].map(([label, ok]) => (
+                    <div key={label as string} className="flex items-center gap-2.5">
+                      <div className={`w-4 h-4 rounded-full flex items-center justify-center ${ok ? "bg-success text-success-foreground" : "bg-muted"}`}>
+                        {ok && <Check className="w-2.5 h-2.5" />}
+                      </div>
+                      <span className={ok ? "text-foreground" : "text-muted-foreground"}>{label as string}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* VALIDATED RECORD */}
+          {step === "record" && (
+            <motion.div key="record" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+              <button onClick={() => setStep("home")} className="text-xs text-muted-foreground mb-4 inline-block">← New scan</button>
+
+              {record ? (
+                <>
+                  <div className="glass-card p-4 mb-3 flex items-center gap-2 text-success">
+                    <ShieldCheck className="w-5 h-5" />
+                    <div>
+                      <div className="text-xs font-semibold">PIN validated by PropertyProof</div>
+                      <div className="text-[10px] text-muted-foreground font-mono">{record.pin}</div>
+                    </div>
+                  </div>
+
+                  <div className="glass-card p-3 mb-3">
+                    <div className="relative rounded-lg overflow-hidden">
+                      <img src={record.img} alt={record.item} className="w-full" />
+                      {record.dnaLocations.filter((l) => l.applied).map((l, i) => (
+                        <div key={i} className="dna-marker active" style={{ left: `${l.x}%`, top: `${l.y}%`, transform: "translate(-50%, -50%)" }} />
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-2 text-center">
+                      <Fingerprint className="w-3 h-3 inline mr-1" />
+                      Recorded DNA placement locations
+                    </p>
+                  </div>
+
+                  <div className="glass-card p-4 space-y-2.5 mb-3">
+                    <h3 className="text-xs font-semibold text-foreground mb-2">Authorized Owner Record</h3>
+                    {[
+                      ["Owner", record.owner],
+                      ["Contact", record.phone],
+                      ["County", record.county],
+                      ["Item", record.item],
+                      [record.serialLabel, record.serial],
+                      ["Value", record.value],
+                      ["Registered", record.registeredAt],
+                      ["Protection Score", `${record.score}`],
+                    ].map(([label, val]) => (
+                      <div key={label} className="flex justify-between gap-3 text-xs">
+                        <span className="text-muted-foreground flex-shrink-0">{label}</span>
+                        <span className="text-foreground font-mono font-medium text-right break-all">{val}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="glass-card p-4">
+                    <h3 className="text-xs font-semibold text-foreground mb-2">DNA Placement Locations</h3>
+                    <div className="space-y-2">
+                      {record.dnaLocations.map((l, i) => (
+                        <div key={l.label} className="flex items-center gap-2.5 text-xs">
+                          <span className={`w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center ${l.applied ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"}`}>{i + 1}</span>
+                          <span className="text-foreground flex-1">{l.label}</span>
+                          <span className="text-[10px] text-muted-foreground">{l.applied ? "Applied" : "Not applied"}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="glass-card p-5 text-center">
+                  <AlertTriangle className="w-7 h-7 text-warning mx-auto mb-2" />
+                  <div className="text-xs font-semibold text-foreground mb-1">No record found</div>
+                  <p className="text-[10px] text-muted-foreground">This PIN is not registered in PropertyProof. Try FL-DNA-3301-VK.</p>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

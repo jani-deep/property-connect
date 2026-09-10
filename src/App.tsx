@@ -10,6 +10,7 @@ import LawEnforcement from "./pages/LawEnforcement";
 import PropertyRoom from "./pages/PropertyRoom";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
+import Emily from "./pages/Emily";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index onLogout={handleLogout} />} />
+            <Route path="/emily" element={<Emily onLogout={handleLogout} />} />
             <Route path="/property-proof" element={<PropertyProof onLogout={handleLogout} />} />
             <Route path="/law-enforcement" element={<LawEnforcement onLogout={handleLogout} />} />
             <Route path="/property-room" element={<PropertyRoom onLogout={handleLogout} />} />

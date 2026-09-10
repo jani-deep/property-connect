@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Shield, ArrowRight, Fingerprint, ChevronRight, Search, Building2 } from "lucide-react";
+import { Shield, ArrowRight, Fingerprint, ChevronRight, Search, Building2, Sparkles } from "lucide-react";
 import MobileHeader from "@/components/MobileHeader";
 import BottomNav from "@/components/BottomNav";
 
@@ -69,6 +69,43 @@ const Index = ({ onLogout }: { onLogout?: () => void }) => {
             <br />
             <span className="text-foreground/80 font-medium">One verified ownership ecosystem.</span>
           </p>
+        </motion.div>
+
+        {/* Emily - AI Guide */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+          className="mb-6"
+        >
+          <Link to="/emily" className="block">
+            <div className="pillar-card border-primary/30">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="p-2.5 rounded-xl bg-primary/10 text-primary flex-shrink-0">
+                  <Sparkles className="w-6 h-6" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-foreground">Meet Emily</h2>
+                    <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold">AI Guide</span>
+                  </div>
+                  <p className="text-xs text-primary font-medium">Guided Registration & DNA Placement</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+              </div>
+              <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+                Emily recognizes your item, confirms ownership, captures identifiers, recommends where to apply the DNA adhesive, records each placement and scores your protection.
+              </p>
+              <div className="grid grid-cols-2 gap-1.5">
+                {["Item Recognition", "Ownership Confirm", "DNA Placement Guide", "Protection Score"].map((f) => (
+                  <div key={f} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <ChevronRight className="w-3 h-3 text-primary flex-shrink-0" />
+                    {f}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Link>
         </motion.div>
 
         {/* Pillar Cards - stacked */}

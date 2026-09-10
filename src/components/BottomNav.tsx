@@ -1,8 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
-import { Fingerprint, Search, Building2, Home } from "lucide-react";
+import { Fingerprint, Search, Building2, Home, Sparkles } from "lucide-react";
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
+  { href: "/emily", label: "Emily", icon: Sparkles },
   { href: "/property-proof", label: "Proof", icon: Fingerprint },
   { href: "/law-enforcement", label: "Search", icon: Search },
   { href: "/property-room", label: "Property", icon: Building2 },
@@ -21,7 +22,7 @@ const BottomNav = () => {
             <Link
               key={item.href}
               to={item.href}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors min-w-[60px] ${
+              className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors min-w-[52px] ${
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground"
