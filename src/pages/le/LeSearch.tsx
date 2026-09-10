@@ -199,9 +199,16 @@ const LeSearch = () => {
               >
                 <Camera className="w-4 h-4" /> Take Picture
               </button>
+              <button
+                onClick={() => fileRef.current?.click()}
+                className="px-4 py-3 rounded-lg bg-muted text-foreground text-sm font-semibold flex items-center gap-2"
+              >
+                <ImageIcon className="w-4 h-4" /> Upload from Gallery
+              </button>
               <button onClick={startCamera} className="px-4 py-3 rounded-lg bg-muted text-foreground text-sm font-semibold flex items-center gap-2">
                 <RefreshCw className="w-4 h-4" /> Retry Camera
               </button>
+              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onPickFile} />
             </div>
           </motion.div>
         )}
