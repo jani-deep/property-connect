@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Fingerprint, Camera, Check, Sparkles, Plus, Package, ChevronLeft, Upload, ImageIcon } from "lucide-react";
 import DemoLayout from "@/components/DemoLayout";
