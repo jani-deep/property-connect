@@ -59,6 +59,27 @@ const LawEnforcement = ({ onLogout }: { onLogout?: () => void }) => {
   const [searchImage, setSearchImage] = useState(demoWatch);
   const [searchLabel, setSearchLabel] = useState("Rolex Submariner – Watch");
   const [useCarMatchesFlag, setUseCarMatchesFlag] = useState(false);
+  const [readerStage, setReaderStage] = useState(0); // 0 locating, 1 mirrored, 2 transmitting, 3 validated
+  const [flipped, setFlipped] = useState(false);
+  const [readerPin, setReaderPin] = useState("FL-DNA-3301-VK");
+  const [record, setRecord] = useState<PropertyRecord | null>(null);
+
+  const startReader = () => {
+    setStep("reader");
+    setReaderStage(0);
+    setFlipped(false);
+    setTimeout(() => setReaderStage(1), 1800);
+  };
+
+  const transmitPin = () => {
+    setReaderStage(2);
+    setTimeout(() => {
+      const found = findByPin(readerPin) || fallbackRecords[readerPin.toUpperCase()] || null;
+      setRecord(found);
+      setReaderStage(3);
+      setTimeout(() => setStep("record"), 700);
+    }, 1600);
+  };
 
   const handleCapture = (img: string, label: string, isCarMatch: boolean) => {
     setSearchImage(img);
