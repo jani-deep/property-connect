@@ -421,6 +421,26 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
       </div>
 
       <div className="fixed bottom-16 left-0 right-0 bg-background/95 backdrop-blur border-t border-border px-3 py-2 pb-3">
+        <div className="flex items-center justify-between mb-2">
+          <button
+            onClick={() => {
+              const next = !voiceOn;
+              setVoiceOn(next);
+              if (!next) stopSpeaking();
+            }}
+            className="inline-flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground"
+          >
+            {voiceOn ? <Volume2 className="w-3 h-3 text-primary" /> : <VolumeX className="w-3 h-3" />}
+            {voiceOn ? "Voice on" : "Voice off"}
+          </button>
+          <button
+            onClick={resetChat}
+            className="inline-flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground"
+          >
+            <RotateCcw className="w-3 h-3" /> Start a new item
+          </button>
+        </div>
+
         {pendingImage && (
           <div className="relative mb-2 w-16 h-16">
             <img src={pendingImage} alt="Selected" className="w-16 h-16 rounded-lg object-cover border border-border" />
