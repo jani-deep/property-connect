@@ -22,6 +22,7 @@ export interface PropertyRecord {
 }
 
 const KEY = "propertyproof.records";
+const CHAT_KEY = "propertyproof.emily.chat";
 
 export const loadRecords = (): PropertyRecord[] => {
   try {
@@ -38,3 +39,33 @@ export const saveRecord = (record: PropertyRecord) => {
 
 export const findByPin = (pin: string): PropertyRecord | undefined =>
   loadRecords().find((r) => r.pin.toUpperCase() === pin.toUpperCase());
+
+/* ---------- Emily chat history (resume where the user left off) ---------- */
+
+export interface StoredChatMessage {
+  role: "user" | "assistant";
+  text: string;
+  image?: string;
+}
+
+export const loadChat = (): StoredChatMessage[] => {
+  try {
+    return JSON.parse(localStorage.getItem(CHAT_KEY) || "[]");
+  } catch {
+    return [];
+  }
+};
+
+export const saveChat = (messages: StoredChatMessage[]) => {
+  try {
+    // keep the transcript small: drop image payloads from older turns
+    const trimmed = messages.slice(-40).map((m, i, arr) =>
+      i < arr.length - 4 && m.image ? { role: m.role, text: m.text } : m
+    );
+    localStorage.setItem(CHAT_KEY, JSON.stringify(trimmed));
+  } catch {
+    /* storage full — ignore */
+  }
+};
+
+export const clearChat = () => localStorage.removeItem(CHAT_KEY);
