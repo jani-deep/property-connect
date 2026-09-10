@@ -1,13 +1,36 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Camera, User, MapPin, AlertTriangle, Shield, Check, Fingerprint, Clock } from "lucide-react";
+import { Search, Camera, User, MapPin, AlertTriangle, Shield, Check, Fingerprint, Clock, ScanLine, FlipHorizontal, Lock, ShieldCheck } from "lucide-react";
 import DemoLayout from "@/components/DemoLayout";
+import { findByPin, PropertyRecord } from "@/lib/propertyRecord";
 import demoWatch from "@/assets/demo-watch.jpg";
 import demoLaptop from "@/assets/demo-laptop.jpg";
 import demoCamera from "@/assets/demo-camera.jpg";
 import demoCar from "@/assets/demo-car.jpg";
 
-type Step = "home" | "captured" | "searching" | "results" | "detail";
+type Step = "home" | "captured" | "searching" | "results" | "detail" | "reader" | "record";
+
+const fallbackRecords: Record<string, PropertyRecord> = {
+  "FL-DNA-3301-VK": {
+    pin: "FL-DNA-3301-VK",
+    item: "BMW 5 Series 530i xDrive",
+    category: "Vehicle",
+    owner: "John Smith",
+    phone: "+1 (555) 000-0000",
+    county: "Brevard County",
+    serial: "WBA53BJ09RWC18294",
+    serialLabel: "VIN",
+    value: "$62,400",
+    img: demoCar,
+    score: 96,
+    registeredAt: "Today, 9:12 AM",
+    dnaLocations: [
+      { label: "Driver door frame", x: 24, y: 55, applied: true },
+      { label: "Windshield lower corner", x: 52, y: 38, applied: true },
+      { label: "Rear bumper inner lip", x: 78, y: 68, applied: true },
+    ],
+  },
+};
 
 const searchHistory = [
   { img: demoCar, label: "BMW 5 Series – Sedan", date: "Today, 2:15 PM" },
