@@ -94,6 +94,7 @@ const allAssets = [
 ];
 
 const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
+  const navigate = useNavigate();
   const [view, setView] = useState<View>("listing");
   const [selectedItem, setSelectedItem] = useState(0);
   const [emilyAssets] = useState(() =>
