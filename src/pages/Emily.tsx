@@ -331,25 +331,8 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
       }
       onLogout={onLogout}
     >
-      <div className="px-4 py-3 flex items-center justify-between">
-        <button
-          onClick={() => {
-            const next = !voiceOn;
-            setVoiceOn(next);
-            if (!next) stopSpeaking();
-          }}
-          className="inline-flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground"
-        >
-          {voiceOn ? <Volume2 className="w-3 h-3 text-primary" /> : <VolumeX className="w-3 h-3" />}
-          {voiceOn ? "Voice on" : "Voice off"}
-        </button>
-        <button
-          onClick={resetChat}
-          className="inline-flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground"
-        >
-          <RotateCcw className="w-3 h-3" /> Start a new item
-        </button>
-      </div>
+
+
 
       {/* Intro: Emily front and centre */}
       {isIntro && (
