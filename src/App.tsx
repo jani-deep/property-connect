@@ -16,6 +16,8 @@ import LeLogin from "./pages/le/LeLogin";
 import LeDashboard from "./pages/le/LeDashboard";
 import LeSearch from "./pages/le/LeSearch";
 import LeHistory from "./pages/le/LeHistory";
+import LeRegistry from "./pages/le/LeRegistry";
+
 import LePanelLayout from "./components/LePanelLayout";
 
 const queryClient = new QueryClient();
@@ -29,6 +31,8 @@ const LePanel = () => {
         <Route path="/" element={<LeDashboard />} />
         <Route path="/search" element={<LeSearch />} />
         <Route path="/history" element={<LeHistory />} />
+        <Route path="/registry" element={<LeRegistry />} />
+
         <Route path="*" element={<LeDashboard />} />
       </Routes>
     </LePanelLayout>
