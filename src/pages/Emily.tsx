@@ -246,10 +246,11 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
             </div>
             <Link
               to="/property-proof"
-              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-xs"
+              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-xs mb-2"
             >
-              <Package className="w-3.5 h-3.5" /> View in My Property
+              <Package className="w-3.5 h-3.5" /> Go to My Properties
             </Link>
+            <p className="text-center text-[10px] text-muted-foreground">Taking you to Home in a moment…</p>
           </motion.div>
         )}
         <div ref={bottomRef} />
