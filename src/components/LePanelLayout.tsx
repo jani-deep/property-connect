@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Shield, LayoutDashboard, ScanLine, LogOut, User, History, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { Shield, LayoutDashboard, ScanLine, LogOut, User, History, Package, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const links = [
   { to: "/le", label: "Dashboard", icon: LayoutDashboard },
   { to: "/le/search", label: "Scan & Search", icon: ScanLine },
+  { to: "/le/registry", label: "Registered Properties", icon: Package },
   { to: "/le/history", label: "Search History", icon: History },
 ];
+
 
 const LePanelLayout = ({ children, onLogout }: { children: React.ReactNode; onLogout?: () => void }) => {
   const { pathname } = useLocation();
