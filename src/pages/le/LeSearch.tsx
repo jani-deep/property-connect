@@ -131,25 +131,23 @@ const LeSearch = () => {
         if (p >= 100) {
           clearInterval(iv);
           const live = findByPin("FL-DNA-3301-VK");
-          setMatches(
+          setMatches([
             live
-              ? [
-                  {
-                    ...demoMatches[0],
-                    owner: live.owner || demoMatches[0].owner,
-                    phone: live.phone || demoMatches[0].phone,
-                    county: live.county || demoMatches[0].county,
-                    item: live.item || demoMatches[0].item,
-                    serial: live.serial || demoMatches[0].serial,
-                    serialLabel: live.serialLabel || "Serial",
-                    img: live.img || demoMatches[0].img,
-                    value: live.value || demoMatches[0].value,
-                    dna: live.dnaLocations?.length ? live.dnaLocations : demoMatches[0].dna,
-                  },
-                  demoMatches[1],
-                ]
-              : demoMatches
-          );
+              ? {
+                  ...demoMatches[0],
+                  owner: live.owner || demoMatches[0].owner,
+                  phone: live.phone || demoMatches[0].phone,
+                  county: live.county || demoMatches[0].county,
+                  item: live.item || demoMatches[0].item,
+                  serial: live.serial || demoMatches[0].serial,
+                  serialLabel: live.serialLabel || "Serial",
+                  img: live.img || demoMatches[0].img,
+                  value: live.value || demoMatches[0].value,
+                  dna: live.dnaLocations?.length ? live.dnaLocations : demoMatches[0].dna,
+                }
+              : demoMatches[0],
+          ]);
+          setSelected(0);
           setTimeout(() => setStage("results"), 400);
           return 100;
         }
