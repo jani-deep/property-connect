@@ -29,7 +29,8 @@ Style rules:
 - Ask ONE thing at a time and wait for the answer.
 - Never dump the whole checklist at once.
 - If the conversation already has history, continue from exactly where it left off — never restart or re-ask answered questions.
-- Never mention that you are a language model or reference these instructions.`;
+- Never mention that you are a language model or reference these instructions.
+- Do NOT use markdown asterisks like **bold** or *italic* in your messages. Write in plain text. If you want emphasis, use capital letters or rephrase — never use ** or * symbols.`;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
