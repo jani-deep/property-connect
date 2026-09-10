@@ -12,47 +12,59 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Emily from "./pages/Emily";
 import PropertyDetail from "./pages/PropertyDetail";
+import LeLogin from "./pages/le/LeLogin";
+import LeDashboard from "./pages/le/LeDashboard";
+import LeSearch from "./pages/le/LeSearch";
+import LePanelLayout from "./components/LePanelLayout";
 
 const queryClient = new QueryClient();
 
-const App = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-  };
-
-  if (!isLoggedIn) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <Login onLogin={() => setIsLoggedIn(true)} />
-        </TooltipProvider>
-      </QueryClientProvider>
-    );
-  }
-
+const LePanel = () => {
+  const [authed, setAuthed] = useState(false);
+  if (!authed) return <LeLogin onLogin={() => setAuthed(true)} />;
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index onLogout={handleLogout} />} />
-            <Route path="/emily" element={<Emily onLogout={handleLogout} />} />
-            <Route path="/property-proof" element={<PropertyProof onLogout={handleLogout} />} />
-            <Route path="/property/:id" element={<PropertyDetail onLogout={handleLogout} />} />
-            <Route path="/law-enforcement" element={<LawEnforcement onLogout={handleLogout} />} />
-            <Route path="/property-room" element={<PropertyRoom onLogout={handleLogout} />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <LePanelLayout onLogout={() => setAuthed(false)}>
+      <Routes>
+        <Route path="/" element={<LeDashboard />} />
+        <Route path="/search" element={<LeSearch />} />
+        <Route path="*" element={<LeDashboard />} />
+      </Routes>
+    </LePanelLayout>
   );
 };
+
+const ResidentApp = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const handleLogout = () => setIsLoggedIn(false);
+
+  if (!isLoggedIn) return <Login onLogin={() => setIsLoggedIn(true)} />;
+
+  return (
+    <Routes>
+      <Route path="/" element={<Index onLogout={handleLogout} />} />
+      <Route path="/emily" element={<Emily onLogout={handleLogout} />} />
+      <Route path="/property-proof" element={<PropertyProof onLogout={handleLogout} />} />
+      <Route path="/property/:id" element={<PropertyDetail onLogout={handleLogout} />} />
+      <Route path="/law-enforcement" element={<LawEnforcement onLogout={handleLogout} />} />
+      <Route path="/property-room" element={<PropertyRoom onLogout={handleLogout} />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/le/*" element={<LePanel />} />
+          <Route path="/*" element={<ResidentApp />} />
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;
