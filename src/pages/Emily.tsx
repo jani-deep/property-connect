@@ -72,13 +72,24 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
 
   /* ---------------- Emily's voice ---------------- */
 
+  const voiceOnRef = useRef(voiceOn);
+  useEffect(() => {
+    voiceOnRef.current = voiceOn;
+  }, [voiceOn]);
+
   const stopSpeaking = useCallback(() => {
-    audioRef.current?.pause();
+    const audio = audioRef.current;
+    if (audio) {
+      audio.onended = null;
+      audio.pause();
+      audio.src = "";
+    }
     audioRef.current = null;
     setSpeaking(false);
   }, []);
 
   const speak = useCallback(async (text: string) => {
+    if (!voiceOnRef.current) return true;
     const line = speakable(text);
     if (!line) return false;
     try {
