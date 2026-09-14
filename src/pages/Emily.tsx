@@ -4,7 +4,7 @@ import { ImagePlus, Send, X, RotateCcw, Package, Check, Mic, MicOff, Volume2, Vo
 import { Link } from "react-router-dom";
 import DemoLayout from "@/components/DemoLayout";
 import emilyAvatar from "@/assets/emily-avatar.png";
-import { loadChat, saveChat, clearChat, saveRecord, isChatComplete, markChatComplete, type PropertyRecord } from "@/lib/propertyRecord";
+import { loadChat, saveChat, clearChat, saveRecord, loadRecords, getChatPropertyPin, setChatPropertyPin, isChatComplete, markChatComplete, type PropertyRecord } from "@/lib/propertyRecord";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -53,7 +53,9 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
   const [listening, setListening] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const lastImageRef = useRef<string | null>(null);
+  const lastImageRef = useRef<string | null>(
+    [...messages].reverse().find((message) => message.image)?.image ?? null
+  );
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const recognitionRef = useRef<any>(null);
   const greetedRef = useRef(false);
@@ -169,8 +171,11 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
     if (!match) return;
     try {
       const d = JSON.parse(match[1]);
+      const pin = getChatPropertyPin() || d.pin || `FL-DNA-${Math.floor(1000 + Math.random() * 9000)}-AX`;
+      setChatPropertyPin(pin);
+      const existing = loadRecords().find((record) => record.pin === pin);
       saveRecord({
-        pin: d.pin || `FL-DNA-${Math.floor(1000 + Math.random() * 9000)}-AX`,
+        pin,
         item: d.item || "Item in registration",
         category: d.category || "General Property",
         owner: "—",
@@ -179,7 +184,7 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
         serial: "—",
         serialLabel: "Serial #",
         value: d.value || "—",
-        img: lastImageRef.current || "",
+        img: lastImageRef.current || existing?.img || "",
         dnaLocations: [],
         score: Number(d.score) || 30,
         registeredAt: new Date().toISOString(),
@@ -195,8 +200,10 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
     if (!match) return;
     try {
       const d = JSON.parse(match[1]);
+      const pin = getChatPropertyPin() || d.pin || `FL-DNA-${Math.floor(1000 + Math.random() * 9000)}-AX`;
+      const existing = loadRecords().find((saved) => saved.pin === pin);
       const record: PropertyRecord = {
-        pin: d.pin || `FL-DNA-${Math.floor(1000 + Math.random() * 9000)}-AX`,
+        pin,
         item: d.item || "Registered item",
         category: d.category || "General Property",
         owner: d.owner || "—",
@@ -205,7 +212,7 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
         serial: d.serial || "—",
         serialLabel: d.serialLabel || "Serial #",
         value: d.value || "—",
-        img: lastImageRef.current || "",
+        img: lastImageRef.current || existing?.img || "",
         dnaLocations: (d.dnaSpots || []).map((label: string) => ({ label, x: 0, y: 0, applied: true })),
         score: Number(d.score) || 85,
         registeredAt: new Date().toISOString(),

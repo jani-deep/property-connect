@@ -65,7 +65,8 @@ const InfoRow = ({ icon, label, value }: { icon: React.ReactNode; label: string;
 const PropertyDetail = ({ onLogout }: { onLogout?: () => void }) => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const record: PropertyRecord | undefined = loadRecords().find((r) => r.pin === id);
+  const records = loadRecords();
+  const record: PropertyRecord | undefined = records.find((r) => r.pin === id);
   const demo = id ? demoAssets[id] : undefined;
 
   if (!record && !demo) {
@@ -82,7 +83,9 @@ const PropertyDetail = ({ onLogout }: { onLogout?: () => void }) => {
   }
 
   const isDraft = record ? record.status === "draft" : !demo!.registered;
-  const img = record ? record.img || demoKeys : demo!.img;
+  const img = record
+    ? record.img || records.find((candidate) => candidate.img && candidate.item === record.item && candidate.category === record.category)?.img || ""
+    : demo!.img;
   const title = record ? record.item : `${demo!.brand} ${demo!.model}`;
   const category = record ? record.category : demo!.category;
   const serial = record ? record.serial : demo!.serial;
@@ -118,8 +121,12 @@ const PropertyDetail = ({ onLogout }: { onLogout?: () => void }) => {
 
         {/* Hero card */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="glass-card overflow-hidden mb-4">
-          <div className="aspect-[16/10] bg-muted">
-            <img src={img} alt={title} className="w-full h-full object-cover" />
+          <div className="aspect-[16/10] bg-muted flex items-center justify-center">
+            {img ? (
+              <img src={img} alt={title} className="w-full h-full object-contain" />
+            ) : (
+              <span className="text-xs text-muted-foreground">No image uploaded</span>
+            )}
           </div>
           <div className="p-4">
             <div className="flex items-start justify-between gap-2 mb-2">

@@ -97,10 +97,15 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
   const navigate = useNavigate();
   const [view, setView] = useState<View>("listing");
   const [selectedItem, setSelectedItem] = useState(0);
-  const [emilyAssets] = useState(() =>
-    loadRecords().map((r) => ({
-      img: r.img || demoKeys,
-      images: [r.img || demoKeys],
+  const [emilyAssets] = useState(() => {
+    const records = loadRecords();
+    return records.map((r) => {
+      const exactUploadedImage = r.img || records.find(
+        (candidate) => candidate.img && candidate.item === r.item && candidate.category === r.category
+      )?.img || "";
+      return ({
+      img: exactUploadedImage,
+      images: exactUploadedImage ? [exactUploadedImage] : [],
       brand: "",
       model: r.item,
       category: r.category,
@@ -112,8 +117,9 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
       pin: r.pin,
       score: r.score,
       draft: r.status === "draft",
-    }))
-  );
+    });
+    });
+  });
   const [dnaPin] = useState("FL-DNA-7829-AX");
   const [markerPos, setMarkerPos] = useState<{ x: number; y: number } | null>(null);
   const [markerActive, setMarkerActive] = useState(false);
@@ -207,7 +213,11 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
                     }}
                   >
                     <div className="w-12 h-12 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-border">
-                      <img src={asset.img} alt={asset.model} className="w-full h-full object-cover" />
+                      {asset.img ? (
+                        <img src={asset.img} alt={asset.model} className="w-full h-full object-contain" />
+                      ) : (
+                        <ImageIcon className="w-5 h-5 text-muted-foreground m-auto mt-3" aria-label="No uploaded image" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-xs font-semibold text-foreground truncate">{asset.brand} {asset.model}</div>
