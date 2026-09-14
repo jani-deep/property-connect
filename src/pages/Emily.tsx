@@ -103,7 +103,10 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
         body: JSON.stringify({ text: line }),
       });
       if (!res.ok) throw new Error(await res.text().catch(() => "tts failed"));
-      const url = URL.createObjectURL(await res.blob());
+      const blob = await res.blob();
+      // The user may have switched voice off while audio was being generated.
+      if (!voiceOnRef.current) return true;
+      const url = URL.createObjectURL(blob);
       stopSpeaking();
       const audio = new Audio(url);
       audioRef.current = audio;
