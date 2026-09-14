@@ -446,13 +446,25 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
           <button
             onClick={() => {
               const next = !voiceOn;
+              voiceOnRef.current = next;
               setVoiceOn(next);
-              if (!next) stopSpeaking();
+              setNeedsTap(false);
+              if (!next) {
+                stopSpeaking();
+                return;
+              }
+              const last = [...messages].reverse().find((m) => m.role === "assistant" && m.text.trim());
+              if (last && !busy) {
+                speak(last.text).then((ok) => {
+                  if (!ok) setNeedsTap(true);
+                });
+              }
             }}
+            aria-pressed={voiceOn}
             className="inline-flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground"
           >
             {voiceOn ? <Volume2 className="w-3 h-3 text-primary" /> : <VolumeX className="w-3 h-3" />}
-            {voiceOn ? "Voice on" : "Voice off"}
+            {voiceOn ? (speaking ? "Speaking… tap to mute" : "Voice on") : "Voice off"}
           </button>
           <button
             onClick={resetChat}
