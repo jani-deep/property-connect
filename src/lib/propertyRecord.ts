@@ -25,6 +25,7 @@ export interface PropertyRecord {
 
 const KEY = "propertyproof.records";
 const CHAT_KEY = "propertyproof.emily.chat";
+const CHAT_PROPERTY_PIN_KEY = "propertyproof.emily.property-pin";
 
 export const loadRecords = (): PropertyRecord[] => {
   try {
@@ -73,7 +74,12 @@ export const saveChat = (messages: StoredChatMessage[]) => {
 export const clearChat = () => {
   localStorage.removeItem(CHAT_KEY);
   localStorage.removeItem(CHAT_DONE_KEY);
+  localStorage.removeItem(CHAT_PROPERTY_PIN_KEY);
 };
+
+/** Keeps every Emily message in one registration tied to the same property. */
+export const getChatPropertyPin = () => localStorage.getItem(CHAT_PROPERTY_PIN_KEY);
+export const setChatPropertyPin = (pin: string) => localStorage.setItem(CHAT_PROPERTY_PIN_KEY, pin);
 
 /* Whether the saved chat finished a full registration (protected + saved) */
 const CHAT_DONE_KEY = "propertyproof.emily.done";
