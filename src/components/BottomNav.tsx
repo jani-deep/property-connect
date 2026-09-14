@@ -4,9 +4,9 @@ import { Fingerprint, Search, Building2, Home, Sparkles } from "lucide-react";
 const navItems = [
   { href: "/", label: "Home", icon: Home },
   { href: "/emily", label: "Emily", icon: Sparkles },
-  { href: "/property-proof", label: "Proof", icon: Fingerprint },
+  { href: "/property-proof", label: "My Property", icon: Fingerprint },
   { href: "/law-enforcement", label: "Search", icon: Search },
-  { href: "/property-room", label: "Property", icon: Building2 },
+  { href: "/property-room", label: "Prop. Room", icon: Building2 },
 ];
 
 const BottomNav = () => {
