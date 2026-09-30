@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { Search, PackageCheck, AlertTriangle, Fingerprint, TrendingUp, Clock, ScanLine, Users, DollarSign } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { loadOfficer } from "@/lib/leData";
+import { Search, KeyRound, PackageCheck, AlertTriangle, Fingerprint, TrendingUp, Clock, ScanLine, Users, DollarSign } from "lucide-react";
 import { maskPhone, maskPin } from "@/lib/mask";
 import demoWatch from "@/assets/demo-watch.jpg";
 import demoCar from "@/assets/demo-car.jpg";
@@ -42,20 +44,27 @@ const statusStyle = (s: string) =>
 
 const maxSearches = Math.max(...counties.map((c) => c.searches));
 
-const LeDashboard = () => (
-  <div className="px-8 py-7 max-w-[1400px]">
-    <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
+const LeDashboard = () => {
+  const officer = loadOfficer();
+  const navigate = useNavigate();
+  const [q, setQ] = useState("");
+  return (
+  <div className="px-4 sm:px-8 py-7 max-w-[1400px]">
+    <div className="flex items-start justify-between mb-5 gap-4 flex-wrap">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Statewide Intelligence Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Florida recovered-property activity across all connected agencies</p>
+        <p className="text-xs font-semibold uppercase text-primary">{officer.agency} · Badge {officer.badge}</p>
+        <h1 className="text-2xl font-bold text-foreground font-heading">Good day, {officer.name}</h1>
+        <p className="text-sm text-muted-foreground">{officer.county} activity · {officer.role}</p>
       </div>
-      <Link
-        to="/le/search"
-        className="px-4 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors flex items-center gap-2"
-      >
-        <ScanLine className="w-4 h-4" /> Scan Recovered Item
-      </Link>
+      <div className="flex gap-2 flex-wrap">
+        <Link to="/le/search" className="px-4 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 flex items-center gap-2"><ScanLine className="w-4 h-4" /> Image Search</Link>
+        <Link to="/le/manual" className="px-4 py-2.5 rounded-lg border border-border bg-card font-semibold text-sm hover:bg-muted flex items-center gap-2"><KeyRound className="w-4 h-4" /> Identifier Search</Link>
+      </div>
     </div>
+    <form onSubmit={(e) => { e.preventDefault(); if (q.trim()) navigate(`/le/manual?q=${encodeURIComponent(q.trim())}`); }} className="glass-card p-3 mb-6 flex gap-2">
+      <div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Quick search: exact PIN, serial or VIN" className="h-10 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm font-mono outline-none focus:ring-2 focus:ring-ring" /></div>
+      <button className="px-4 rounded-md bg-primary text-primary-foreground text-sm font-semibold">Search</button>
+    </form>
 
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
       {stats.map((s, i) => {
@@ -83,7 +92,7 @@ const LeDashboard = () => (
 
     <div className="grid lg:grid-cols-2 gap-5">
       <div className="glass-card p-5">
-        <h2 className="text-sm font-semibold text-foreground mb-4">Searches & Recoveries by County</h2>
+        <h2 className="text-sm font-semibold text-foreground mb-4">Statewide activity by county (anonymous)</h2>
         <div className="space-y-4">
           {counties.map((c) => (
             <div key={c.name}>
@@ -105,7 +114,7 @@ const LeDashboard = () => (
       </div>
 
       <div className="glass-card p-5">
-        <h2 className="text-sm font-semibold text-foreground mb-4">Recent Microdot Matches</h2>
+        <h2 className="text-sm font-semibold text-foreground mb-4">Your agency's recent matches</h2>
         <div className="space-y-3">
           {recent.map((r, i) => (
             <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
@@ -131,6 +140,7 @@ const LeDashboard = () => (
       </div>
     </div>
   </div>
-);
+  );
+};
 
 export default LeDashboard;
