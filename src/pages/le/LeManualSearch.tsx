@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Barcode, Eye, Fingerprint, Lock, MapPin, Search, ShieldAlert, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,8 @@ const LeManualSearch = () => {
   const [scanning, setScanning] = useState(false);
   const officer = loadOfficer();
   const canRevealSensitive = officer.role === "Supervisor" || officer.role === "Agency Administrator";
+
+  useEffect(() => { if (params.get("q")) run(params.get("q")!); }, []); // eslint-disable-line
 
   const run = (value = query) => {
     const r = findExact(value) ?? null;
