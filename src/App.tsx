@@ -17,9 +17,6 @@ import LeDashboard from "./pages/le/LeDashboard";
 import LeSearch from "./pages/le/LeSearch";
 import LeHistory from "./pages/le/LeHistory";
 import LeManualSearch from "./pages/le/LeManualSearch";
-import LeStr from "./pages/le/LeStr";
-import LeApis from "./pages/le/LeApis";
-import LeCases from "./pages/le/LeCases";
 import LeAudit from "./pages/le/LeAudit";
 import LeApprovals from "./pages/le/LeApprovals";
 import LeVideos from "./pages/le/LeVideos";
@@ -40,9 +37,6 @@ const LePanel = () => {
         <Route path="/search" element={<LeSearch />} />
         <Route path="/history" element={<LeHistory />} />
         <Route path="/manual" element={<LeManualSearch />} />
-        <Route path="/str" element={<LeStr />} />
-        <Route path="/apis" element={<LeApis />} />
-        <Route path="/cases" element={<LeCases />} />
         <Route path="/audit" element={<LeAudit />} />
         <Route path="/approvals" element={<LeApprovals />} />
         <Route path="/videos" element={<LeVideos />} />
