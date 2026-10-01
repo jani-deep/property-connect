@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Shield, LayoutDashboard, ScanLine, LogOut, User, History, PanelLeftClose, PanelLeftOpen, KeyRound, Bot, ClipboardCheck, ScrollText, PlayCircle } from "lucide-react";
+import { Shield, LayoutDashboard, ScanLine, LogOut, User, History, PanelLeftClose, PanelLeftOpen, KeyRound, ClipboardCheck, ScrollText, PlayCircle } from "lucide-react";
 import { loadOfficer } from "@/lib/leData";
 import { Button } from "@/components/ui/button";
 
