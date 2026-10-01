@@ -20,7 +20,6 @@ import LeManualSearch from "./pages/le/LeManualSearch";
 import LeAudit from "./pages/le/LeAudit";
 import LeApprovals from "./pages/le/LeApprovals";
 import LeVideos from "./pages/le/LeVideos";
-import LeDavid from "./pages/le/LeDavid";
 import LeProfile from "./pages/le/LeProfile";
 
 import LePanelLayout from "./components/LePanelLayout";
@@ -40,7 +39,6 @@ const LePanel = () => {
         <Route path="/audit" element={<LeAudit />} />
         <Route path="/approvals" element={<LeApprovals />} />
         <Route path="/videos" element={<LeVideos />} />
-        <Route path="/david" element={<LeDavid />} />
         <Route path="/profile" element={<LeProfile />} />
 
         <Route path="*" element={<LeDashboard />} />
