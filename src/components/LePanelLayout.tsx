@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Shield, LayoutDashboard, ScanLine, LogOut, User, History, PanelLeftClose, PanelLeftOpen, KeyRound, ClipboardCheck, ScrollText, PlayCircle } from "lucide-react";
+import { Shield, LayoutDashboard, ScanLine, LogOut, User, History, PanelLeftClose, PanelLeftOpen, KeyRound, ClipboardCheck, ScrollText, PlayCircle, Bot } from "lucide-react";
 import { loadOfficer } from "@/lib/leData";
 import { Button } from "@/components/ui/button";
 
@@ -9,9 +9,10 @@ const links = [
   { to: "/le/search", label: "Scan & Search", icon: ScanLine },
   { to: "/le/manual", label: "Manual Search", icon: KeyRound },
   { to: "/le/history", label: "Search History", icon: History },
+  { to: "/le/david", label: "David AI Investigator", icon: Bot },
   { to: "/le/approvals", label: "Approval Queue", icon: ClipboardCheck },
   { to: "/le/audit", label: "Audit & Team", icon: ScrollText },
-  { to: "/le/videos", label: "Videos", icon: PlayCircle },
+  { to: "/le/videos", label: "Videos", icon: PlayCircle, Bot },
   { to: "/le/profile", label: "My Profile", icon: User },
 ];
 
