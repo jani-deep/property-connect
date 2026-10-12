@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Shield, Phone, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 interface LoginProps {
@@ -76,6 +77,12 @@ const Login = ({ onLogin }: LoginProps) => {
               </button>
               <p className="text-xs text-muted-foreground text-center mt-3">
                 Any mobile number works for this demo
+              </p>
+              <p className="text-[11px] text-muted-foreground text-center mt-2 leading-relaxed">
+                By continuing you agree to our{" "}
+                <Link to="/terms" className="text-primary font-semibold hover:underline">Terms & Conditions</Link>{" "}
+                and{" "}
+                <Link to="/privacy" className="text-primary font-semibold hover:underline">Privacy Policy</Link>.
               </p>
             </div>
           ) : (

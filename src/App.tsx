@@ -9,6 +9,8 @@ import PropertyProof from "./pages/PropertyProof";
 import LawEnforcement from "./pages/LawEnforcement";
 import PropertyRoom from "./pages/PropertyRoom";
 import NotFound from "./pages/NotFound";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import Login from "./pages/Login";
 import Emily from "./pages/Emily";
 import PropertyDetail from "./pages/PropertyDetail";
@@ -75,6 +77,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="/le/*" element={<LePanel />} />
           <Route path="/*" element={<ResidentApp />} />
         </Routes>
