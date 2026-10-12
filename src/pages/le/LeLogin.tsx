@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Shield, ArrowRight, Lock, CheckCircle2, Clock3, Mail } from "lucide-react";
+import { Link } from "react-router-dom";
 import { LE_ROLES, loadOfficer, saveOfficer } from "@/lib/leData";
 import { Field, inputCls } from "@/components/le/LePage";
 
@@ -52,6 +53,12 @@ const LeLogin = ({ onLogin }: { onLogin: () => void }) => {
               {error && <p className="text-xs text-destructive">{error}</p>}
               <button onClick={login} className={btn}><Lock className="w-4 h-4" /> Login</button>
               <p className="text-xs text-muted-foreground text-center">Demo: any email and password works.</p>
+              <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
+                By logging in you agree to our{" "}
+                <Link to="/terms" className="text-primary font-semibold hover:underline">Terms & Conditions</Link>{" "}
+                and{" "}
+                <Link to="/privacy" className="text-primary font-semibold hover:underline">Privacy Policy</Link>.
+              </p>
               <p className="text-sm text-center text-muted-foreground">New to the console? <button className={link} onClick={() => { setError(""); setMode("register"); }}>Register now</button></p>
             </div>
           )}
@@ -71,6 +78,12 @@ const LeLogin = ({ onLogin }: { onLogin: () => void }) => {
               </div>
               {error && <p className="text-xs text-destructive mt-3">{error}</p>}
               <button onClick={register} className={`${btn} mt-5`}>Submit for approval <ArrowRight className="w-4 h-4" /></button>
+              <p className="text-[11px] text-muted-foreground text-center leading-relaxed mt-4">
+                By registering you agree to our{" "}
+                <Link to="/terms" className="text-primary font-semibold hover:underline">Terms & Conditions</Link>{" "}
+                and{" "}
+                <Link to="/privacy" className="text-primary font-semibold hover:underline">Privacy Policy</Link>.
+              </p>
               <p className="text-sm text-center text-muted-foreground mt-3">Already registered? <button className={link} onClick={() => setMode("login")}>Login</button></p>
             </div>
           )}
