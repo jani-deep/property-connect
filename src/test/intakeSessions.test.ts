@@ -1,9 +1,16 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createIntake, effectiveStatus, submitIntake, reviewIntake, exportPackage, blankIntakeItem, completeness } from "@/lib/intakeSessions";
+import { updateIntake } from "@/lib/intakeSessions";
+import { loadTheftIncidents } from "@/lib/theftIncidents";
+import { inviteWitness, updateWitness, witnessView } from "@/lib/witnessSessions";
 
 const create = () => createIntake({ agency: "Test agency", agencyNumber: "EV-26-12", eventType: "Theft", assigned: "Officer", participant: "Participant", delivery: "Agency-managed link" }, 24);
 beforeEach(() => localStorage.clear());
 describe("David intake safeguards", () => {
+  it("preserves original statement across corrected versions", () => { const original = updateIntake(create(), { narrative: "My watch was taken at 9 PM" }, "Participant completed incident step"); const corrected = updateIntake(original, { narrative: "My watch was taken at 10 PM" }, "Participant corrected narrative"); expect(corrected.originalStatement).toBe("My watch was taken at 9 PM"); expect(corrected.narrative).toBe("My watch was taken at 10 PM"); expect(corrected.versions?.length).toBe(2); });
+  it("creates a linked theft record without altering original property", () => { const property = { pin: "ORIGINAL-PIN", item: "Watch", status: "protected" }; localStorage.setItem("propertyproof.records", JSON.stringify([property])); const s = submitIntake({ ...create(), consent: true, verified: true, narrative: "Watch stolen", items: [{ ...blankIntakeItem(), name: "Watch", sourcePin: "ORIGINAL-PIN" }] }); expect(JSON.parse(localStorage.getItem("propertyproof.records") ?? "[]")[0]).toEqual(property); expect(loadTheftIncidents()[0].id).toBe(s.incidentId); expect(loadTheftIncidents()[0].items[0].propertyPin).toBe("ORIGINAL-PIN"); });
+  it("keeps witness view independent from victim session and evidence", () => { const victim = create(); const w = inviteWitness(victim.id, "Witness", victim.expiresAt); const view = witnessView(w.token); expect(view).not.toHaveProperty("parentId"); expect(view).not.toHaveProperty("evidence"); expect(view).not.toHaveProperty("narrative"); expect(view?.statement).toBe(""); });
+  it("requires witness consent before independent attestation", () => { const s = create(); const w = inviteWitness(s.id, "Witness", s.expiresAt); expect(() => updateWitness(w.token, { statement: "I saw a person leave" }, true)).toThrow(); });
   it("expires unfinished time-limited sessions", () => { const s = create(); expect(effectiveStatus(s, new Date(s.expiresAt).getTime())).toBe("Expired"); });
   it("requires participant consent before package submission", () => { const s = { ...create(), verified: true, narrative: "Watch taken", items: [{ ...blankIntakeItem(), name: "Watch" }] }; expect(() => submitIntake(s)).toThrow(); });
   it("requires participant verification before package submission", () => { const s = { ...create(), consent: true, narrative: "Watch taken", items: [{ ...blankIntakeItem(), name: "Watch" }] }; expect(() => submitIntake(s)).toThrow(); });
