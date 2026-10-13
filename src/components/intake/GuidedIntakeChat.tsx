@@ -21,9 +21,9 @@ export default function GuidedIntakeChat({ session, onChange }: { session: Intak
   useEffect(() => { ref.current?.focus(); }, [question]);
   const save = (patch: Partial<IntakeSession>, action?: string) => { try { onChange(updateIntake(session, patch, action)); setError(""); } catch { setError("Your progress could not be saved in this browser. Try removing large files."); } };
   const answer = (text: string) => {
-    try { const result = answerIntake(session, question, text); save({ ...result.patch, intakeMessages: [...messages, chatMessage("user", text), chatMessage("assistant", questions[result.next])] }, result.action); setInput(""); ref.current?.focus(); } catch (e) { setError((e as Error).message); }
+    try { const result = answerIntake(session, question, text); const next = session.intakeCorrection ? "review" : result.next; save({ ...result.patch, ...(session.intakeCorrection ? { intakeQuestion: "review", intakeCorrection: false, step: 5 } : {}), intakeMessages: [...messages, chatMessage("user", text), chatMessage("assistant", questions[next])] }, result.action ?? (session.intakeCorrection ? "Participant corrected report detail" : undefined)); setInput(""); ref.current?.focus(); } catch (e) { setError((e as Error).message); }
   };
-  const correct = (q: IntakeQuestion) => { setAttest(false); save({ intakeQuestion: q, step: q === "narrative" || q === "location" ? 1 : 4, intakeMessages: [...messages, chatMessage("assistant", `Let’s correct that detail. ${questions[q]}`)] }); };
+  const correct = (q: IntakeQuestion) => { setAttest(false); save({ intakeQuestion: q, intakeCorrection: true, step: q === "narrative" || q === "location" ? 1 : 4, intakeMessages: [...messages, chatMessage("assistant", `Let’s correct that detail. ${questions[q]}`)] }); };
   const attach = async (file: File | undefined) => {
     if (!file) return;
     if (file.size > 1500000 || (!file.type.startsWith("image/") && !(question === "receipt" && file.type === "application/pdf"))) { setError("Choose an image or PDF receipt smaller than 1.5 MB."); return; }

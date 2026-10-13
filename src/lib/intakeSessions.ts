@@ -16,6 +16,7 @@ export interface IntakeSession {
   attestedAt?: string; reviewNote: string; corrections: string; timeline: { at: string; action: string }[];
   originalStatement?: string; originalItems?: IntakeItem[]; versions?: IntakeVersion[]; messages?: UIMessage[]; incidentId?: string;
   intakeQuestion?: IntakeQuestion; intakeMessages?: UIMessage[];
+  intakeCorrection?: boolean;
 }
 export const INTAKE_KEY = "propertyproof.david.intake.v1";
 export const INTAKE_CHANGE = "propertyproof-intake-change";
