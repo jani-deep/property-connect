@@ -1,5 +1,8 @@
 # Roadmap
 
+- [ ] Match David precisely to Emily's avatar header, glass message bubbles, single-row composer and bottom navigation
+- [ ] Verify the matching appearance and one-question-at-a-time reporting on mobile
+
 - [x] Make David intake a full-height Emily-style chat with an always-visible reply bar
 - [x] Verify My Property and agency-link items appear in David Operations with downloadable submitted reports
 
