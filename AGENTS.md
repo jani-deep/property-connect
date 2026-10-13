@@ -8,3 +8,4 @@
 - David intake conversations use AI SDK UIMessage streams and AI Elements; keep AI credentials and investigative prompts server-side.
 - Guided participant chat maps explicit answers to intake fields through a pure transition module; AI suggestions never silently change attested facts.
 - Guided intake voice uses the existing server-side David TTS persona and browser dictation; keep transcripts editable until explicitly submitted so voice cannot silently attest facts.
+- Use the shared demo-operations visibility predicate for session lists and details: resident-origin reports enter the demo queue, while agency invitations remain agency-scoped, avoiding inconsistent report visibility without claiming production authorization.

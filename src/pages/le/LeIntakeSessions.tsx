@@ -5,20 +5,20 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, Field, inputCls, LePage } from "@/components/le/LePage";
 import { loadOfficer } from "@/lib/leData";
-import { completeness, createIntake, effectiveStatus, updateIntake, useIntakes, type IntakeSession } from "@/lib/intakeSessions";
+import { completeness, createIntake, effectiveStatus, updateIntake, useIntakes, visibleInDemoOperations, type IntakeSession } from "@/lib/intakeSessions";
 
 export default function LeIntakeSessions() {
   const sessions = useIntakes(); const officer = loadOfficer(); const navigate = useNavigate();
   const [open, setOpen] = useState(false); const [created, setCreated] = useState<IntakeSession | null>(null); const [error, setError] = useState("");
   const [filter, setFilter] = useState("All sessions"); const [search, setSearch] = useState("");
   const [form, setForm] = useState({ participant: "", agencyNumber: "", eventType: "Residential burglary", delivery: "Agency-managed link", lifetime: "24" });
-  const own = sessions.filter((s) => s.agency === officer.agency);
+  const own = sessions.filter((s) => visibleInDemoOperations(s, officer.agency));
   const completed = own.filter((s) => s.completedAt); const durations = completed.filter((s) => s.startedAt).map((s) => (new Date(s.completedAt ?? s.createdAt).getTime() - new Date(s.startedAt ?? s.createdAt).getTime()) / 60000);
   const avg = durations.length ? `${Math.max(1, Math.round(durations.reduce((a, b) => a + b, 0) / durations.length))}m` : "—";
   const create = () => { if (!form.participant.trim() || !form.agencyNumber.trim()) { setError("Enter a participant label and agency event or case number."); return; } const s = createIntake({ agency: officer.agency, agencyNumber: form.agencyNumber.trim(), eventType: form.eventType, assigned: officer.name, participant: form.participant.trim(), delivery: form.delivery }, Number(form.lifetime)); setCreated(s); setOpen(false); setError(""); };
   const link = created ? `${window.location.origin}/intake/${created.token}` : "";
   const deliver = () => { if (!created) return; setCreated(updateIntake(created, { status: "Delivered", deliveredAt: new Date().toISOString() }, `Demo link delivery recorded: ${created.delivery}`)); };
-  const visible = own.filter((s) => (filter === "All sessions" || effectiveStatus(s) === filter) && `${s.participant} ${s.agencyNumber} ${s.eventType}`.toLowerCase().includes(search.toLowerCase()));
+  const visible = own.filter((s) => (filter === "All sessions" || effectiveStatus(s) === filter) && `${s.participant} ${s.agencyNumber} ${s.eventType} ${s.items.map((i) => i.name).join(" ")}`.toLowerCase().includes(search.toLowerCase()));
   return <LePage eyebrow="Agency-guided victim intake" title="David Operations" action={<Button onClick={() => setOpen(true)}><Plus />Create a session</Button>}>
     <section className="mb-6 flex flex-wrap items-center justify-between gap-4 border-y border-primary/20 bg-primary/5 px-5 py-5"><div className="flex items-center gap-3"><div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10"><ShieldCheck className="h-7 w-7 text-primary" /></div><div><h2 className="font-heading text-lg font-semibold">Deploy David AI Investigator</h2><p className="text-sm text-muted-foreground">{officer.agency}</p><p className="mt-1 text-xs text-warning">Demo sessions · simulated delivery and verification · saved in this browser only</p></div></div><Button variant="outline" asChild><Link to="/le/david/search">Recovered-item search <ArrowRight /></Link></Button></section>
     <div className="mb-7 grid gap-3 sm:grid-cols-3">{[{ title: "Sessions sent", value: own.filter((s) => s.deliveredAt).length, sub: `${own.filter((s) => s.startedAt).length} started`, icon: Send }, { title: "Completed packages", value: completed.length, sub: `${own.filter((s) => s.status === "Completed").length} awaiting agency review`, icon: FileCheck2 }, { title: "Average completion", value: avg, sub: "Started to participant attestation", icon: Clock3 }].map((m) => <Card key={m.title} className="p-5"><div className="flex items-center justify-between text-xs text-muted-foreground">{m.title}<m.icon className="h-4 w-4 text-primary" /></div><p className="my-2 font-heading text-3xl font-bold">{m.value}</p><p className="text-xs text-muted-foreground">{m.sub}</p></Card>)}</div>
