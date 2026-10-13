@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, ImagePlus, Pause, Pencil, ShieldCheck } from "lucide-react";
+import { Check, ImagePlus, Mic, MicOff, Pause, Pencil, Play, ShieldCheck, Volume2, VolumeX } from "lucide-react";
+import { useDavidVoice } from "@/hooks/useDavidVoice";
 import { Button } from "@/components/ui/button";
 import { Conversation, ConversationContent, ConversationScrollButton } from "@/components/ai-elements/conversation";
 import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
@@ -18,9 +19,13 @@ export default function GuidedIntakeChat({ session, onChange }: { session: Intak
   const ref = useRef<HTMLTextAreaElement>(null); const fileRef = useRef<HTMLInputElement>(null);
   const question = initialQuestion(session);
   const messages = session.intakeMessages?.length ? session.intakeMessages : [chatMessage("assistant", questions[question])];
+  const latest = [...messages].reverse().find((message) => message.role === "assistant");
+  const spokenText = latest?.parts.flatMap((part) => part.type === "text" ? [part.text] : []).join(" ") ?? "";
+  const voice = useDavidVoice(latest?.id ?? `initial-${question}`, spokenText, setInput);
   useEffect(() => { ref.current?.focus(); }, [question]);
   const save = (patch: Partial<IntakeSession>, action?: string) => { try { onChange(updateIntake(session, patch, action)); setError(""); } catch { setError("Your progress could not be saved in this browser. Try removing large files."); } };
   const answer = (text: string) => {
+    voice.stopListening();
     try { const result = answerIntake(session, question, text); const next = session.intakeCorrection ? "review" : result.next; save({ ...result.patch, ...(session.intakeCorrection ? { intakeQuestion: "review", intakeCorrection: false, step: 5 } : {}), intakeMessages: [...messages, chatMessage("user", text), chatMessage("assistant", questions[next])] }, result.action ?? (session.intakeCorrection ? "Participant corrected report detail" : undefined)); setInput(""); ref.current?.focus(); } catch (e) { setError((e as Error).message); }
   };
   const correct = (q: IntakeQuestion) => { setAttest(false); save({ intakeQuestion: q, intakeCorrection: true, step: q === "narrative" || q === "location" ? 1 : 4, intakeMessages: [...messages, chatMessage("assistant", `Let’s correct that detail. ${questions[q]}`)] }); };
@@ -43,7 +48,13 @@ export default function GuidedIntakeChat({ session, onChange }: { session: Intak
       {question === "property" && <Button size="sm" variant="outline" onClick={() => { setShowRecords(!showRecords); }}>Choose from My Property</Button>}
     </div>
     {question === "property" && showRecords && <section className="mb-4 space-y-2"><p className="text-xs text-muted-foreground">Selecting a record authorizes including it in this report; the original stays unchanged.</p>{loadRecords().filter((r) => r.status !== "draft").map((r) => <Button key={r.pin} variant="outline" className="h-auto w-full justify-start whitespace-normal py-3 text-left" disabled={session.items.some((i) => i.sourcePin === r.pin)} onClick={() => { save({ portfolioConsent: true, items: [...session.items, { id: crypto.randomUUID(), name: r.item, category: r.category, identifier: r.serial, dnaPin: r.pin, details: r.dnaLocations.map((d) => d.label).join(", "), value: r.value, source: "Emily record", sourcePin: r.pin }], intakeQuestion: "more", intakeMessages: [...messages, chatMessage("user", `I authorize including my ${r.item} record.`), chatMessage("assistant", `I’ve included your saved details for review without changing the original. ${questions.more}`)] }, "Participant authorized selected Emily record"); setShowRecords(false); }}>{r.item}</Button>)}{!loadRecords().some((r) => r.status !== "draft") && <p className="text-sm">No saved properties here. Describe your item in the chat.</p>}</section>}
-    {question !== "review" && <PromptInput onSubmit={({ text }) => answer(text)}><PromptInputTextarea ref={ref} value={input} onChange={(e) => setInput(e.target.value)} placeholder="Reply to David…" /><PromptInputFooter className="justify-end"><PromptInputSubmit disabled={!input.trim()} /></PromptInputFooter></PromptInput>}
+    <div className="mb-2 flex flex-wrap items-center gap-2">
+      <Button type="button" variant="ghost" size="sm" aria-pressed={voice.voiceOn} onClick={voice.toggleVoice}>{voice.voiceOn ? <Volume2 className="text-primary" /> : <VolumeX />}{voice.voiceOn ? (voice.loading ? "Preparing voice…" : voice.speaking ? "Speaking… tap to mute" : "Voice on") : "Voice off"}</Button>
+      {voice.needsTap && <Button type="button" variant="outline" size="sm" onClick={() => void voice.replay()}><Play />Play David’s message</Button>}
+    </div>
+    {voice.listening && <p role="status" className="mb-2 text-xs font-medium text-primary">Listening… speak now</p>}
+    {question !== "review" && <PromptInput onSubmit={({ text }) => answer(text)}><PromptInputTextarea ref={ref} value={input} onChange={(e) => setInput(e.target.value)} placeholder="Reply to David…" /><PromptInputFooter className="justify-between"><Button type="button" variant={voice.listening ? "default" : "ghost"} size="icon" aria-label={voice.listening ? "Stop voice input" : "Speak to David"} title={voice.listening ? "Stop voice input" : "Microphone answers are transcribed for your review before sending"} aria-pressed={voice.listening} onClick={voice.toggleListening}>{voice.listening ? <MicOff /> : <Mic />}</Button><PromptInputSubmit disabled={!input.trim()} /></PromptInputFooter></PromptInput>}
+    {voice.error && <p role="alert" className="mt-2 text-sm text-destructive">{voice.error}</p>}
     {question === "consent" && <p className="mt-3 text-xs text-muted-foreground"><a href="/privacy" className="text-primary underline">Privacy Policy</a> · <a href="/terms" className="text-primary underline">Terms & Conditions</a></p>}
     {(question === "photo" || question === "receipt") && <div className="mt-3">{session.evidence.map((e) => <div key={e.id} className="flex items-center gap-2 py-2 text-xs">{e.url.startsWith("data:image/") && <img src={e.url} alt={e.name} width={48} height={48} className="h-12 w-12 rounded-md object-cover" />}<span className="min-w-0 break-words">{e.name}</span><Button variant="ghost" size="sm" onClick={() => save({ evidence: session.evidence.filter((x) => x.id !== e.id) })}>Remove</Button></div>)}<FictionalEvidence session={session} onChange={onChange} /></div>}
     {(question === "witness" || question === "review") && <WitnessInvitations session={session} />}
