@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { addAudit, leRecords } from "@/lib/leData";
 import { loadRecords } from "@/lib/propertyRecord";
 import { BRIDGE_CHANGE, loadEvents, loadStages, loadStolen, RETURN_STAGES, setStage, type BridgeEvent } from "@/lib/bridge";
-import { maskValue } from "@/lib/mask";
+import { maskPin } from "@/lib/mask";
 
 interface Msg { role: "user" | "assistant"; text: string; image?: string }
 const KEY = "propertyproof.le.david";
@@ -189,7 +189,7 @@ const LeDavid = () => {
           {cases.map((c) => (
             <div key={c.pin} className="rounded-lg border border-border bg-card p-3">
               <div className="text-sm font-semibold leading-tight">{c.item}</div>
-              <div className="mb-2 font-mono text-[11px] text-muted-foreground">{maskValue(c.pin)} · {c.county}</div>
+              <div className="mb-2 font-mono text-[11px] text-muted-foreground">{maskPin(c.pin)} · {c.county}</div>
               <div className="mb-2 flex gap-1">{RETURN_STAGES.map((_, i) => <div key={i} className={`h-1.5 flex-1 rounded-full ${i <= c.stage ? "bg-primary" : "bg-muted"}`} />)}</div>
               <div className="flex items-center justify-between text-xs">
                 <span className="font-medium">{RETURN_STAGES[c.stage]}</span>
