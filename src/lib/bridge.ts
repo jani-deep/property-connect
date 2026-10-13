@@ -21,6 +21,8 @@ export const isReportedStolen = (pin: string) => loadStolen().includes(pin);
 export const reportStolen = (r: Pick<PropertyRecord, "pin" | "item" | "county">) => {
   if (isReportedStolen(r.pin)) return;
   write(STOLEN_KEY, [r.pin, ...loadStolen()]);
+  // A new theft starts a fresh case, even if the item was returned before.
+  const stages = loadStages(); if (r.pin in stages) { delete stages[r.pin]; write(STAGE_KEY, stages); }
   logEvent({ type: "stolen", pin: r.pin, item: r.item, county: r.county });
 };
 
