@@ -33,7 +33,7 @@ export function createIntake(input: Pick<IntakeSession, "agency" | "agencyNumber
 }
 export function updateIntake(s: IntakeSession, patch: Partial<IntakeSession>, action?: string) {
   const current = loadIntakes().find((i) => i.id === s.id) ?? s;
-  const next = { ...current, ...patch, originalStatement: current.originalStatement,
+  const next = { ...current, ...s, ...patch, messages: patch.messages ?? current.messages ?? s.messages, originalStatement: current.originalStatement,
     originalItems: current.originalItems,
     timeline: action ? [...current.timeline, { at: new Date().toISOString(), action }] : current.timeline };
   if (action === "Participant completed incident step" && !next.originalStatement) next.originalStatement = next.narrative;
