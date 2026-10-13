@@ -75,9 +75,9 @@ export const addAudit = (e: Omit<AuditEntry, "id" | "at" | "officer" | "agency">
 };
 
 /* Supervisor approval queue */
-export interface ApprovalRequest { id: string; officer: string; item: string; pin: string; category: string; reason: string; caseNo: string; status: "Pending" | "Approved" | "Denied"; at: string; county?: string; }
+export interface ApprovalRequest { id: string; officer: string; item: string; pin: string; category: string; reason: string; caseNo: string; status: "Pending" | "Approved" | "Denied"; at: string; county?: string; dnaReason?: string; ticket?: string; serial?: string; agency?: string; }
 export const addApproval = (a: Omit<ApprovalRequest, "id" | "at" | "status" | "officer">) =>
-  saveApprovals([{ ...a, id: crypto.randomUUID(), at: new Date().toISOString(), status: "Pending", officer: loadOfficer().name }, ...loadApprovals()]);
+  saveApprovals([{ ...a, agency: loadOfficer().agency, id: crypto.randomUUID(), at: new Date().toISOString(), status: "Pending", officer: loadOfficer().name }, ...loadApprovals()]);
 const APPROVAL_KEY = "propertyproof.le.approvals";
 const seedApprovals: ApprovalRequest[] = [
   { id: "r1", officer: "Ofc. Kayla Brooks", item: "BMW 5 Series 530i xDrive", pin: "FL-DNA-3301-VK", category: "Vehicle", reason: "Vehicle recovered at I-4 rest stop", caseNo: "OC-26-11851", status: "Pending", at: "2026-09-30T09:20:00Z" },

@@ -62,6 +62,27 @@ const LeDavid = () => {
   const fileRef = useRef<HTMLInputElement>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const { registry, resident, events, stages } = useBridge();
+  type Intake = { pin: string; item: string; county: string; serial: string; step: number; answers: string[] };
+  const [intake, setIntake] = useState<Intake | null>(null);
+  const intakeRef = useRef<Intake | null>(null);
+  const say = (text: string) => { setMessages((m) => [...m, { role: "assistant", text }]); speak(text); };
+  const INTAKE_Q = [
+    "**2 of 3 · Case number:** what's the agency case number for this?",
+    "**3 of 3 · DNA kit reason:** how was the DNA microdot found or read? (for example: scanned with the field kit, UV light on the caseback)",
+  ];
+  const handleIntake = (answer: string) => {
+    const cur = intakeRef.current!; const answers = [...cur.answers, answer];
+    setMessages((m) => [...m, { role: "user", text: answer }]);
+    if (/^(cancel|stop)$/i.test(answer)) { intakeRef.current = null; setIntake(null); say("Okay, I've cancelled that request. Nothing was sent."); return; }
+    if (answers.length < 3) { intakeRef.current = { ...cur, answers, step: answers.length }; setIntake(intakeRef.current); say(INTAKE_Q[answers.length - 1]); return; }
+    const [reason, caseNo, dnaReason] = answers;
+    const ticket = `TKT-${Date.now().toString().slice(-6)}`;
+    addApproval({ item: cur.item, pin: cur.pin, serial: cur.serial, category: ownerOf(cur.pin)?.category ?? "Property", reason, caseNo, dnaReason, county: cur.county, ticket });
+    setStage(cur.pin, cur.item, cur.county, 1);
+    addAudit({ action: "Owner reveal requested", reason, caseNo, data: `${ticket} · ${cur.pin}` });
+    intakeRef.current = null; setIntake(null);
+    say(`Done. I've raised ticket **${ticket}** and sent it to a supervisor in the Approval Queue.\n\n**Item:** ${cur.item}\n**Reason:** ${reason}\n**Case:** ${caseNo}\n**DNA kit:** ${dnaReason}\n\nOnce it's approved, the owner's details will show in the side panel.`);
+  };
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); localStorage.setItem(KEY, JSON.stringify(messages.slice(-40).map((m, i, a) => (i < a.length - 4 ? { role: m.role, text: m.text } : m)))); }, [messages]);
 
@@ -84,6 +105,16 @@ const LeDavid = () => {
   const send = async (text = input) => {
     if ((!text.trim() && !image) || busy) return;
     stopSpeaking();
+    if (intakeRef.current && text.trim()) { setInput(""); handleIntake(text.trim()); return; }
+    const wantsReveal = /reveal|owner|ticket|approval/i.test(text);
+    const pinHit = registry.find((r) => text.toUpperCase().includes(r.pin) || (r.serial && text.toUpperCase().includes(r.serial.toUpperCase())));
+    const lastCase = Object.keys(stages).find((p) => stages[p] === 0);
+    const target = pinHit ?? (lastCase ? registry.find((r) => r.pin === lastCase) : undefined);
+    if (wantsReveal && target && (stages[target.pin] ?? 0) === 0 && /request|raise|reveal/i.test(text)) {
+      setInput(""); setMessages((m) => [...m, { role: "user", text: text.trim() }]);
+      if (stages[target.pin] === undefined) setStage(target.pin, target.item, target.county, 0);
+      startIntake(target); return;
+    }
     const userMsg: Msg = { role: "user", text: text.trim(), image: image ?? undefined };
     const history = [...messages, userMsg];
     setMessages([...history, { role: "assistant", text: "" }]);
@@ -132,15 +163,12 @@ const LeDavid = () => {
     { label: "Recovered", value: registry.filter((r) => r.status === "Recovered").length + Object.values(stages).filter((s) => s === 3).length, cls: "text-success" },
     { label: "Pending reveals", value: Object.values(stages).filter((s) => s === 1).length, cls: "text-warning" },
   ];
-  const [revealFor, setRevealFor] = useState<string | null>(null);
-  const [reason, setReason] = useState(""); const [caseNo, setCaseNo] = useState("");
+
   const ownerOf = (pin: string) => { const r = loadRecords().find((x) => x.pin === pin) ?? leRecords.find((x) => x.pin === pin); return r ? { owner: r.owner, phone: r.phone, category: r.category } : undefined; };
-  const requestReveal = (c: { pin: string; item: string; county: string }) => {
-    if (!reason.trim() || !caseNo.trim()) return;
-    addApproval({ item: c.item, pin: c.pin, category: ownerOf(c.pin)?.category ?? "Property", reason: reason.trim(), caseNo: caseNo.trim(), county: c.county });
-    setStage(c.pin, c.item, c.county, 1);
-    addAudit({ action: "Owner reveal requested", reason: reason.trim(), caseNo: caseNo.trim(), data: c.pin });
-    setRevealFor(null); setReason(""); setCaseNo("");
+  const startIntake = (c: { pin: string; item: string; county: string; serial?: string }) => {
+    intakeRef.current = { pin: c.pin, item: c.item, county: c.county, serial: c.serial ?? "", step: 0, answers: [] };
+    setIntake(intakeRef.current);
+    say(`I'll raise an owner-reveal ticket for **${c.item}** (${maskPin(c.pin)}). I need three details, one at a time.\n\n**1 of 3 · Reason for the match:** why are you checking this item? (for example: recovered at a pawn shop, traffic stop)`);
   };
   const cases = Object.entries(stages).map(([pin, stage]) => ({ ...(registry.find((r) => r.pin === pin) ?? { pin, item: pin, county: "", serial: "", status: "" }), stage }));
 
@@ -181,7 +209,7 @@ const LeDavid = () => {
             <div className="flex items-end gap-2 rounded-xl border border-input bg-background p-2">
               <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => { onFile(e.target.files?.[0]); e.target.value = ""; }} />
               <Button variant="ghost" size="icon" onClick={() => fileRef.current?.click()} aria-label="Attach photo"><ImagePlus /></Button>
-              <textarea ref={taRef} autoFocus rows={1} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder={listening ? "Listening… speak now" : "Ask or speak to David, or enter a PIN / serial / VIN…"} className="max-h-32 flex-1 resize-none bg-transparent py-2 text-sm outline-none" />
+              <textarea ref={taRef} autoFocus rows={1} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder={intake ? "Answer David… (type cancel to stop)" : listening ? "Listening… speak now" : "Ask or speak to David, or enter a PIN / serial / VIN…"} className="max-h-32 flex-1 resize-none bg-transparent py-2 text-sm outline-none" />
               <Button variant={listening ? "destructive" : "ghost"} size="icon" onClick={toggleMic} aria-label="Speak to David">{listening ? <MicOff /> : <Mic />}</Button>
               <Button size="icon" onClick={() => send()} disabled={busy || (!input.trim() && !image)} aria-label="Send">{busy ? <Loader2 className="animate-spin" /> : <Send />}</Button>
             </div>
@@ -203,13 +231,7 @@ const LeDavid = () => {
               <div className="mb-2 font-mono text-[11px] text-muted-foreground">{maskPin(c.pin)} · {c.county}</div>
               <div className="mb-2 flex gap-1">{RETURN_STAGES.map((_, i) => <div key={i} className={`h-1.5 flex-1 rounded-full ${i <= c.stage ? "bg-primary" : "bg-muted"}`} />)}</div>
               <div className="mb-2 text-xs font-medium">{RETURN_STAGES[c.stage]}</div>
-              {c.stage === 0 && (revealFor === c.pin ? (
-                <div className="space-y-1.5">
-                  <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason for reveal" className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs" />
-                  <input value={caseNo} onChange={(e) => setCaseNo(e.target.value)} placeholder="Case number" className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs" />
-                  <div className="flex gap-1.5"><Button size="sm" variant="ghost" className="h-7 flex-1 text-xs" onClick={() => setRevealFor(null)}>Cancel</Button><Button size="sm" className="h-7 flex-1 text-xs" disabled={!reason.trim() || !caseNo.trim()} onClick={() => requestReveal(c)}>Send for approval</Button></div>
-                </div>
-              ) : <Button size="sm" variant="outline" className="h-7 w-full text-xs" onClick={() => setRevealFor(c.pin)}>Request owner reveal</Button>)}
+              {c.stage === 0 && <Button size="sm" variant="outline" className="h-7 w-full text-xs" disabled={!!intake} onClick={() => startIntake(c)}>{intake?.pin === c.pin ? "David is collecting details…" : "Ask David to raise a ticket"}</Button>}
               {c.stage === 1 && <p className="rounded-md bg-warning/10 px-2 py-1.5 text-[11px] text-warning">Waiting for supervisor in <Link to="/le/approvals" className="font-semibold underline">Approval Queue</Link></p>}
               {c.stage === 2 && (() => { const o = ownerOf(c.pin); return (
                 <div className="space-y-2">

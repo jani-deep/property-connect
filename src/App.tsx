@@ -21,6 +21,7 @@ import LeHistory from "./pages/le/LeHistory";
 import LeManualSearch from "./pages/le/LeManualSearch";
 import LeAudit from "./pages/le/LeAudit";
 import LeApprovals from "./pages/le/LeApprovals";
+import LeApprovalDetail from "./pages/le/LeApprovalDetail";
 import LeVideos from "./pages/le/LeVideos";
 import LeProfile from "./pages/le/LeProfile";
 import LeDavid from "./pages/le/LeDavid";
@@ -41,6 +42,7 @@ const LePanel = () => {
         <Route path="/manual" element={<LeManualSearch />} />
         <Route path="/audit" element={<LeAudit />} />
         <Route path="/approvals" element={<LeApprovals />} />
+        <Route path="/approvals/:id" element={<LeApprovalDetail />} />
         <Route path="/david" element={<LeDavid />} />
         <Route path="/videos" element={<LeVideos />} />
         <Route path="/profile" element={<LeProfile />} />
