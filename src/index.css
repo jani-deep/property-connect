@@ -81,6 +81,20 @@
 }
 
 @layer components {
+  .david-compact-composer > [data-slot="input-group"] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 36px;
+    align-items: end;
+    gap: 8px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+  .david-compact-composer [data-slot="input-group-addon"] {
+    width: auto;
+    padding: 0;
+  }
   .glass-card {
     @apply bg-card border border-border rounded-xl;
     box-shadow: var(--shadow-card);
