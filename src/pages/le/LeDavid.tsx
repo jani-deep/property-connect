@@ -106,14 +106,23 @@ const LeDavid = () => {
     if ((!text.trim() && !image) || busy) return;
     stopSpeaking();
     if (intakeRef.current && text.trim()) { setInput(""); handleIntake(text.trim()); return; }
-    const wantsReveal = /reveal|owner|ticket|approval/i.test(text);
-    const pinHit = registry.find((r) => text.toUpperCase().includes(r.pin) || (r.serial && text.toUpperCase().includes(r.serial.toUpperCase())));
-    const lastCase = Object.keys(stages).find((p) => stages[p] === 0);
-    const target = pinHit ?? (lastCase ? registry.find((r) => r.pin === lastCase) : undefined);
-    if (wantsReveal && target && (stages[target.pin] ?? 0) === 0 && /request|raise|reveal/i.test(text)) {
-      setInput(""); setMessages((m) => [...m, { role: "user", text: text.trim() }]);
-      if (stages[target.pin] === undefined) setStage(target.pin, target.item, target.county, 0);
-      startIntake(target); return;
+    // Owner-reveal ticket: David collects the details himself, one at a time.
+    const lastDavid = [...messages].reverse().find((m) => m.role === "assistant")?.text ?? "";
+    const affirm = /^(yes|yeah|yep|ok|okay|sure|please|go ahead|proceed|do it|raise it)\b/i.test(text.trim()) && /reveal|ticket|approval/i.test(lastDavid);
+    const wantsReveal = affirm || /(reveal|ticket|approval|approve|owner (info|details|contact)|contact (the )?owner|who owns)/i.test(text);
+    if (wantsReveal) {
+      const userTexts = [text, ...messages.filter((m) => m.role === "user").map((m) => m.text).reverse()];
+      let target: (typeof registry)[number] | undefined;
+      for (const t of userTexts) { target = findRecordInText(t, registry); if (target) break; }
+      if (!target) target = findRecordInText(lastDavid, registry);
+      if (target) {
+        setInput(""); setMessages((m) => [...m, { role: "user", text: text.trim() }]);
+        const st = stages[target.pin];
+        if (st === 1) { say(`There's already a pending ticket for **${target.item}**. It's waiting for a supervisor in the Approval Queue.`); return; }
+        if (st === 2) { say(`The reveal for **${target.item}** is already approved. The owner's details are in the side panel.`); return; }
+        if (st === undefined || st === 3) setStage(target.pin, target.item, target.county, 0);
+        startIntake(target); return;
+      }
     }
     const userMsg: Msg = { role: "user", text: text.trim(), image: image ?? undefined };
     const history = [...messages, userMsg];
