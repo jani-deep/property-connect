@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { addApproval, addAudit, leRecords } from "@/lib/leData";
 import { Link } from "react-router-dom";
 import { loadRecords } from "@/lib/propertyRecord";
-import { BRIDGE_CHANGE, loadEvents, loadStages, loadStolen, RETURN_STAGES, setStage, type BridgeEvent } from "@/lib/bridge";
+import { findRecordInText, BRIDGE_CHANGE, loadEvents, loadStages, loadStolen, RETURN_STAGES, setStage, type BridgeEvent } from "@/lib/bridge";
 import { maskPin } from "@/lib/mask";
 
 interface Msg { role: "user" | "assistant"; text: string; image?: string }
@@ -136,7 +136,8 @@ const LeDavid = () => {
       if (!acc) throw new Error("David returned no answer.");
       speak(acc);
       // Auto-open a return case when David's answer names a known stolen PIN.
-      const hit = registry.find((r) => r.status === "Stolen" && (acc + text).toUpperCase().includes(r.pin));
+      const named = findRecordInText(text, registry);
+      const hit = registry.find((r) => r.status === "Stolen" && ((acc + text).toUpperCase().includes(r.pin) || r.pin === named?.pin));
       if (hit && stages[hit.pin] === undefined) setStage(hit.pin, hit.item, hit.county, 0);
     } catch (e) {
       setMessages((m) => m.slice(0, -1)); setError((e as Error).message);
@@ -173,6 +174,7 @@ const LeDavid = () => {
   // Side panel only shows items discussed in this chat session.
   const chatText = messages.map((m) => m.text).join(" ").toUpperCase();
   const chatPins = new Set(registry.filter((r) => chatText.includes(r.pin) || (r.serial && r.serial.length > 5 && chatText.includes(r.serial.toUpperCase()))).map((r) => r.pin));
+  messages.filter((m) => m.role === "user").forEach((m) => { const h = findRecordInText(m.text, registry); if (h) chatPins.add(h.pin); });
   const cases = Object.entries(stages).filter(([pin]) => chatPins.has(pin)).map(([pin, stage]) => ({ ...(registry.find((r) => r.pin === pin) ?? { pin, item: pin, county: "", serial: "", status: "" }), stage }));
 
   return (

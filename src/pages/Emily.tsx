@@ -4,6 +4,7 @@ import { ImagePlus, Send, X, RotateCcw, Package, Check, Mic, MicOff, Volume2, Vo
 import { Link } from "react-router-dom";
 import DemoLayout from "@/components/DemoLayout";
 import emilyAvatar from "@/assets/emily-avatar.png";
+import { findRecordInText, reportStolen, STOLEN_INTENT, isReportedStolen } from "@/lib/bridge";
 import { loadChat, saveChat, clearChat, saveRecord, loadRecords, getChatPropertyPin, setChatPropertyPin, isChatComplete, markChatComplete, type PropertyRecord } from "@/lib/propertyRecord";
 
 interface ChatMessage {
@@ -325,6 +326,14 @@ const Emily = ({ onLogout }: { onLogout?: () => void }) => {
       } else {
         draftFromBlock(acc);
         registerFromBlock(acc);
+        // Resident says an item was stolen → report it to David (LE console).
+        if (STOLEN_INTENT.test(userMsg.text)) {
+          const hit = findRecordInText(userMsg.text, loadRecords().filter((r) => r.status !== "draft"));
+          if (hit && !isReportedStolen(hit.pin)) {
+            reportStolen({ pin: hit.pin, item: hit.item, county: hit.county });
+            setMessages((m) => [...m, { role: "assistant", text: `I've reported your ${hit.item} as stolen. David, our law-enforcement AI investigator, and officers statewide have been alerted. Your name and phone stay private until an officer gets supervisor approval.` }]);
+          }
+        }
         if (voiceOn) speak(stripBlocks(acc));
       }
     } catch {
