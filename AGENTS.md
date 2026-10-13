@@ -6,3 +6,4 @@
 - Preserve existing resident and LE authentication flows; publicly accessible intake URLs carry demo session context only.
 - Preserve property registrations and original victim statements; theft incidents, structured versions and independent witness records are separate immutable-source layers.
 - David intake conversations use AI SDK UIMessage streams and AI Elements; keep AI credentials and investigative prompts server-side.
+- Guided participant chat maps explicit answers to intake fields through a pure transition module; AI suggestions never silently change attested facts.
