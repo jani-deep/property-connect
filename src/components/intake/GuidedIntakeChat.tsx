@@ -21,7 +21,7 @@ export default function GuidedIntakeChat({ session, onChange }: { session: Intak
   const messages = session.intakeMessages?.length ? session.intakeMessages : [chatMessage("assistant", questions[question])];
   const latest = [...messages].reverse().find((message) => message.role === "assistant");
   const spokenText = latest?.parts.flatMap((part) => part.type === "text" ? [part.text] : []).join(" ") ?? "";
-  const voice = useDavidVoice(latest?.id ?? `initial-${question}`, spokenText, setInput);
+  const voice = useDavidVoice(session.intakeMessages?.length ? latest?.id ?? question : `initial-${question}`, spokenText, setInput);
   useEffect(() => { ref.current?.focus(); }, [question]);
   const save = (patch: Partial<IntakeSession>, action?: string) => { try { onChange(updateIntake(session, patch, action)); setError(""); } catch { setError("Your progress could not be saved in this browser. Try removing large files."); } };
   const answer = (text: string) => {
