@@ -3,8 +3,8 @@ import { motion } from "framer-motion";
 import { Shield, ArrowRight, Fingerprint, ChevronRight, Search, Building2 } from "lucide-react";
 import MobileHeader from "@/components/MobileHeader";
 import emilyAvatar from "@/assets/emily-avatar.png";
+import davidAvatar from "@/assets/david-avatar.jpg";
 import BottomNav from "@/components/BottomNav";
-import { Button } from "@/components/ui/button";
 
 const pillars = [
   {
@@ -110,10 +110,35 @@ const Index = ({ onLogout }: { onLogout?: () => void }) => {
           </Link>
         </motion.div>
 
-        <section className="mb-6 flex items-center justify-between gap-3 border-y border-border py-5">
-          <div><h2 className="font-heading text-lg font-semibold">David · Stolen property</h2><p className="mt-1 text-xs text-muted-foreground">Agency intake & Recovery Packages</p></div>
-          <Button variant="outline" size="sm" asChild><Link to="/david">My reports <ArrowRight /></Link></Button>
-        </section>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="mb-6">
+          <Link to="/david" className="block">
+            <div className="pillar-card border-primary/30">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-b from-primary/20 to-accent/10 overflow-hidden flex-shrink-0 ring-1 ring-primary/20">
+                  <img src={davidAvatar} alt="David — AI reporting guide" className="w-full h-full object-cover object-top" loading="lazy" width={512} height={512} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="text-lg font-bold text-foreground">Meet David</h2>
+                    <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold">AI Guide</span>
+                  </div>
+                  <p className="text-xs text-primary font-medium">Guided Reporting & Recovery Packages</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+              </div>
+              <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+                David guides your stolen-property report one question at a time, collects relevant details and evidence, and prepares a Recovery Package for your review and agency assessment.
+              </p>
+              <div className="grid grid-cols-2 gap-1.5">
+                {["Guided Conversation", "Property & Evidence", "Pause & Resume", "Recovery Package"].map((f) => (
+                  <div key={f} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <ChevronRight className="w-3 h-3 text-primary flex-shrink-0" />{f}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Link>
+        </motion.div>
         {/* Pillar Cards - stacked */}
         <div className="space-y-4 mb-8">
           {pillars.map((pillar, i) => (
