@@ -2,7 +2,7 @@ import { useState } from "react";
 import { CheckCircle2, Download, FileText, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, inputCls } from "@/components/le/LePage";
-import { completeness, exportPackage, reviewIntake, type IntakeSession } from "@/lib/intakeSessions";
+import { completeness, exportPackage, exportReportHtml, reviewIntake, type IntakeSession } from "@/lib/intakeSessions";
 import { loadWitnesses } from "@/lib/witnessSessions";
 
 export const RecoveryPackage = ({ session, agencyReview = false, onChange }: { session: IntakeSession; agencyReview?: boolean; onChange?: (s: IntakeSession) => void }) => {
@@ -11,6 +11,7 @@ export const RecoveryPackage = ({ session, agencyReview = false, onChange }: { s
   const [error, setError] = useState("");
   const decide = (decision: "Accepted" | "Rejected" | "More information requested") => { try { const next = reviewIntake(session, decision, note, corrections); onChange?.(next); setError(""); } catch (e) { setError((e as Error).message); } };
   const download = () => { try { const blob = new Blob([exportPackage(session)], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `Recovery-Package-${session.agencyNumber}.json`; a.click(); URL.revokeObjectURL(url); } catch (e) { setError((e as Error).message); } };
+  const downloadReport = () => { try { const blob = new Blob([exportReportHtml(session)], { type: "text/html" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `Investigation-Report-${session.agencyNumber}.html`; a.click(); URL.revokeObjectURL(url); } catch (e) { setError((e as Error).message); } };
   return <div className="space-y-6">
     <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border pb-4"><div><h2 className="flex items-center gap-2 font-heading text-xl font-bold"><FileText className="h-5 w-5 text-primary" />Recovery Package</h2><p className="text-xs text-muted-foreground">{session.agencyNumber} · {session.eventType} · {session.agency}</p></div><span className="text-sm font-semibold text-primary">{completeness(session)}% completeness</span></div>
     <div className="rounded-md border border-warning/30 bg-warning/10 p-3 text-xs text-foreground"><strong>Human review required.</strong> Participant-provided information, not an official police report or proof of ownership. Missing identifiers and evidence remain visible; do not collect unnecessary personal information.</div>
@@ -26,7 +27,7 @@ export const RecoveryPackage = ({ session, agencyReview = false, onChange }: { s
     <section><h3 className="mb-2 font-semibold">Session provenance</h3><ol className="space-y-2 border-l border-border pl-4">{session.timeline.map((t, i) => <li key={`${t.at}-${i}`} className="text-xs"><p>{t.action}</p><time className="text-muted-foreground">{new Date(t.at).toLocaleString()}</time></li>)}</ol></section>
     {session.reviewNote && <section className="border-t border-border pt-4"><h3 className="mb-2 font-semibold">Agency review · {session.status}</h3><p className="whitespace-pre-wrap text-sm">{session.reviewNote}</p>{session.corrections && <p className="mt-2 whitespace-pre-wrap text-sm"><strong>Agency corrections:</strong> {session.corrections}</p>}</section>}
     {agencyReview && session.status === "Completed" && <section className="space-y-4 border-t border-border pt-5"><h3 className="flex items-center gap-2 font-semibold"><ShieldCheck className="h-5 w-5 text-primary" />Agency review</h3><Field label="Agency corrections / clarification (preserves original participant information)"><textarea className={`${inputCls} h-24 py-2`} value={corrections} onChange={(e) => setCorrections(e.target.value)} /></Field><Field label="Review reason / feedback (required)"><textarea className={`${inputCls} h-24 py-2`} value={note} onChange={(e) => setNote(e.target.value)} /></Field><div className="flex flex-wrap gap-2"><Button onClick={() => decide("Accepted")}><CheckCircle2 />Accept package</Button><Button variant="outline" onClick={() => decide("More information requested")}>Request more information</Button><Button variant="destructive" onClick={() => decide("Rejected")}>Reject package</Button></div></section>}
-    {agencyReview && session.status === "Accepted" && <Button onClick={download}><Download />Export accepted package</Button>}
+    {agencyReview && session.attestedAt && ["Completed", "Accepted"].includes(session.status) && <div className="flex flex-wrap gap-2"><Button onClick={downloadReport}><Download />Download investigation report</Button><Button variant="outline" onClick={download}><Download />Export data (JSON)</Button></div>}
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
   </div>;
 };

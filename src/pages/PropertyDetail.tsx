@@ -18,6 +18,7 @@ import demoKeys from "@/assets/demo-keys.jpg";
 import { loadRecords, type PropertyRecord } from "@/lib/propertyRecord";
 import { isReportedStolen, reportStolen } from "@/lib/bridge";
 import { useState } from "react";
+import { startPropertyReport } from "@/lib/intakeSessions";
 
 const demoAssets: Record<string, { img: string; brand: string; model: string; category: string; serial: string; value: string; registered: boolean; dnaPlaced: boolean }> = {
   "demo-0": { img: demoCar, brand: "BMW", model: "5 Series 530i xDrive", category: "Vehicle – Sedan", serial: "WBA53BJ09RWC18294", value: "$56,200", registered: true, dnaPlaced: true },
@@ -225,10 +226,10 @@ const PropertyDetail = ({ onLogout }: { onLogout?: () => void }) => {
             <div className="text-xs font-bold text-foreground mb-1">Item stolen?</div>
             <p className="text-[10px] text-muted-foreground mb-3">Reporting alerts David, the law-enforcement AI investigator, statewide. Your name and phone stay hidden from officers.</p>
             {stolen ? (
-              <div className="w-full px-4 py-3 rounded-lg bg-destructive/10 text-destructive font-semibold text-xs text-center">Reported stolen · David has been alerted</div>
+              <div className="space-y-2"><div className="w-full px-4 py-3 rounded-lg bg-destructive/10 text-destructive font-semibold text-xs text-center">Reported stolen · David has been alerted</div><button onClick={() => { const r = startPropertyReport({ pin, name: title, category, identifier: serial, value, county: record?.county }); navigate(`/intake/${r.token}`); }} className="w-full px-4 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-xs">Continue report with David</button></div>
             ) : (
               <button
-                onClick={() => { reportStolen({ pin, item: title, county: record?.county || "Orange County" }); setStolen(true); }}
+                onClick={() => { reportStolen({ pin, item: title, county: record?.county || "Orange County" }); setStolen(true); const r = startPropertyReport({ pin, name: title, category, identifier: serial, value, county: record?.county }); navigate(`/intake/${r.token}`); }}
                 className="w-full px-4 py-3 rounded-lg border border-destructive/40 text-destructive font-semibold text-xs hover:bg-destructive/5"
               >
                 Report as stolen
