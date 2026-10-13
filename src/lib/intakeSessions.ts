@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { UIMessage } from "ai";
 import { recordTheft } from "./theftIncidents";
 import { loadWitnesses } from "./witnessSessions";
+import type { IntakeQuestion } from "./intakeConversation";
 
 export type IntakeStatus = "Created" | "Delivered" | "Started" | "Paused" | "Expired" | "Completed" | "Abandoned" | "More information requested" | "Accepted" | "Rejected";
 export interface IntakeItem { id: string; name: string; category: string; identifier: string; dnaPin: string; details: string; value: string; source: "Emily record" | "Participant"; sourcePin?: string }
@@ -14,6 +15,7 @@ export interface IntakeSession {
   narrative: string; location: string; incidentAt: string; loss: string; witness: string; items: IntakeItem[]; evidence: IntakeEvidence[];
   attestedAt?: string; reviewNote: string; corrections: string; timeline: { at: string; action: string }[];
   originalStatement?: string; originalItems?: IntakeItem[]; versions?: IntakeVersion[]; messages?: UIMessage[]; incidentId?: string;
+  intakeQuestion?: IntakeQuestion; intakeMessages?: UIMessage[];
 }
 export const INTAKE_KEY = "propertyproof.david.intake.v1";
 export const INTAKE_CHANGE = "propertyproof-intake-change";
