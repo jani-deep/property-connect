@@ -67,6 +67,7 @@ const InfoRow = ({ icon, label, value }: { icon: React.ReactNode; label: string;
 const PropertyDetail = ({ onLogout }: { onLogout?: () => void }) => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [stolenState, setStolen] = useState(false);
   const records = loadRecords();
   const record: PropertyRecord | undefined = records.find((r) => r.pin === id);
   const demo = id ? demoAssets[id] : undefined;

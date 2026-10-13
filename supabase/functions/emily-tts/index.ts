@@ -15,7 +15,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { text } = await req.json();
+    const { text, persona } = await req.json();
+    const david = persona === "david";
     if (!text || typeof text !== "string") {
       return new Response(JSON.stringify({ error: "Missing text" }), {
         status: 400,
@@ -32,9 +33,10 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: "openai/gpt-4o-mini-tts",
         input: text.slice(0, 3000),
-        voice: "shimmer",
-        instructions:
-          "Speak as Emily, a warm, friendly and professional female guide. Calm, clear, reassuring pace.",
+        voice: david ? "onyx" : "shimmer",
+        instructions: david
+          ? "Speak as David, a calm, confident, professional male law-enforcement AI investigator. Clear, measured briefing pace."
+          : "Speak as Emily, a warm, friendly and professional female guide. Calm, clear, reassuring pace.",
         response_format: "mp3",
         stream_format: "audio",
       }),
