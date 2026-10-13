@@ -29,6 +29,7 @@ import LeIntakeSessions from "./pages/le/LeIntakeSessions";
 import LeIntakeDetail from "./pages/le/LeIntakeDetail";
 import IntakeSessionPage from "./pages/IntakeSession";
 import ResidentDavid from "./pages/ResidentDavid";
+import WitnessIntake from "./pages/WitnessIntake";
 
 import LePanelLayout from "./components/LePanelLayout";
 
@@ -89,6 +90,7 @@ const App = () => (
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/intake/:token" element={<IntakeSessionPage />} />
+          <Route path="/witness/:token" element={<WitnessIntake />} />
           <Route path="/le/*" element={<LePanel />} />
           <Route path="/*" element={<ResidentApp />} />
         </Routes>

@@ -21,6 +21,7 @@ import demoPhoneSide from "@/assets/demo-phone-side.jpg";
 import demoPhoneBack from "@/assets/demo-phone-back.jpg";
 import demoKeys from "@/assets/demo-keys.jpg";
 import { loadRecords } from "@/lib/propertyRecord";
+import { Button } from "@/components/ui/button";
 
 type View = "listing" | "capture" | "uploading" | "captured" | "analyzing" | "results" | "dna-select" | "dna-place";
 
@@ -179,6 +180,7 @@ const PropertyProof = ({ onLogout }: { onLogout?: () => void }) => {
       onLogout={onLogout}
     >
       <div className="px-4 py-4">
+        {view === "listing" && <div className="mb-4 flex items-center justify-between gap-3 border-y border-border py-3"><div><p className="text-sm font-semibold">Stolen-property reporting</p><p className="text-xs text-muted-foreground">David · agency intake sessions</p></div><Button variant="outline" size="sm" onClick={() => navigate("/david")}>My reports</Button></div>}
         <AnimatePresence mode="wait">
           {/* LISTING VIEW */}
           {view === "listing" && (

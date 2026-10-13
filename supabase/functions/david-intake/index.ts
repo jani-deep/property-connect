@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
         return e.responseBody ?? e.message ?? "David could not complete this investigation turn.";
       }, headers: corsHeaders });
     // Start the stream first; never wait for result.response to resolve.
-    return stream;
+    return await withLovableAiGatewayRunIdHeader(stream, call.gateway, corsHeaders);
   } catch (error) {
     const e = error as { name?: string; statusCode?: number; responseBody?: string; message?: string };
     return fail(e.responseBody ?? e.message ?? "David could not respond.", e.name === "AbortError" ? 499 : e.statusCode ?? 400);
