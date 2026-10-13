@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { UIMessage } from "ai";
 import { recordTheft } from "./theftIncidents";
+import { loadWitnesses } from "./witnessSessions";
 
 export type IntakeStatus = "Created" | "Delivered" | "Started" | "Paused" | "Expired" | "Completed" | "Abandoned" | "More information requested" | "Accepted" | "Rejected";
 export interface IntakeItem { id: string; name: string; category: string; identifier: string; dnaPin: string; details: string; value: string; source: "Emily record" | "Participant"; sourcePin?: string }
@@ -33,7 +34,7 @@ export function createIntake(input: Pick<IntakeSession, "agency" | "agencyNumber
 }
 export function updateIntake(s: IntakeSession, patch: Partial<IntakeSession>, action?: string) {
   const current = loadIntakes().find((i) => i.id === s.id) ?? s;
-  const next = { ...current, ...s, ...patch, messages: patch.messages ?? current.messages ?? s.messages, originalStatement: current.originalStatement,
+  const next = { ...current, ...s, ...patch, versions: current.versions ?? s.versions, messages: patch.messages ?? current.messages ?? s.messages, originalStatement: current.originalStatement,
     originalItems: current.originalItems,
     timeline: action ? [...current.timeline, { at: new Date().toISOString(), action }] : current.timeline };
   if (action === "Participant completed incident step" && !next.originalStatement) next.originalStatement = next.narrative;
@@ -67,7 +68,10 @@ export function reviewIntake(s: IntakeSession, decision: "Accepted" | "Rejected"
 export function exportPackage(s: IntakeSession) {
   if (s.status !== "Accepted") throw new Error("Agency acceptance is required before export.");
   const { token, messages, ...packageData } = s;
-  return JSON.stringify({ title: "PropertyProof Recovery Package", ...packageData, evidence: s.evidence.map(({ url, ...e }) => e),
+  void token; void messages;
+  const witnesses = loadWitnesses().filter((w) => w.parentId === s.id).map((w) => ({ label: w.label, status: w.status,
+    statement: w.status === "Completed" ? w.originalStatement : undefined, attestedAt: w.attestedAt, source: "Independent witness session" }));
+  return JSON.stringify({ title: "PropertyProof Recovery Package", ...packageData, witnesses, evidence: s.evidence.map(({ url, ...e }) => { void url; return e; }),
     notice: "Participant-provided information; not an official police report. Agency review does not independently verify ownership." }, null, 2);
 }
 export const blankIntakeItem = (): IntakeItem => ({ id: crypto.randomUUID(), name: "", category: "", identifier: "", dnaPin: "", details: "", value: "", source: "Participant" });
