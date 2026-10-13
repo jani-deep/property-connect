@@ -1,7 +1,7 @@
 # Roadmap
 
-- [ ] Add David spoken replies and microphone answers matching Emily
-- [ ] Verify voice controls and one-question-at-a-time answer flow
+- [x] Add David spoken replies and microphone answers matching Emily
+- [x] Verify voice controls and one-question-at-a-time answer flow
 
 - [x] Match David to Emily with an avatar and one-question-at-a-time reporting chat
 - [x] Verify chat answers, pause/resume, corrections and attested package submission

@@ -1,8 +1,8 @@
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useDavidVoice } from "@/hooks/useDavidVoice";
 
-afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks(); });
+afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 describe("David intake voice", () => {
   it("speaks each new David message with the David persona after enabling voice", async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, blob: async () => new Blob(["audio"], { type: "audio/mpeg" }) });
