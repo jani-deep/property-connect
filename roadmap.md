@@ -1,7 +1,7 @@
 # Roadmap
 
-- [ ] Match David to Emily with an avatar and one-question-at-a-time reporting chat
-- [ ] Verify chat answers, pause/resume, corrections and attested package submission
+- [x] Match David to Emily with an avatar and one-question-at-a-time reporting chat
+- [x] Verify chat answers, pause/resume, corrections and attested package submission
 
 - [x] Add David agency session dashboard and creation/delivery demo
 - [x] Add resident consent, verification, guided intake, evidence and attestation
