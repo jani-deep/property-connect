@@ -16,6 +16,8 @@ import demoCarBack from "@/assets/demo-car-back.jpg";
 import demoPhone from "@/assets/demo-phone.jpg";
 import demoKeys from "@/assets/demo-keys.jpg";
 import { loadRecords, type PropertyRecord } from "@/lib/propertyRecord";
+import { isReportedStolen, reportStolen } from "@/lib/bridge";
+import { useState } from "react";
 
 const demoAssets: Record<string, { img: string; brand: string; model: string; category: string; serial: string; value: string; registered: boolean; dnaPlaced: boolean }> = {
   "demo-0": { img: demoCar, brand: "BMW", model: "5 Series 530i xDrive", category: "Vehicle – Sedan", serial: "WBA53BJ09RWC18294", value: "$56,200", registered: true, dnaPlaced: true },
@@ -65,6 +67,7 @@ const InfoRow = ({ icon, label, value }: { icon: React.ReactNode; label: string;
 const PropertyDetail = ({ onLogout }: { onLogout?: () => void }) => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [stolenState, setStolen] = useState(false);
   const records = loadRecords();
   const record: PropertyRecord | undefined = records.find((r) => r.pin === id);
   const demo = id ? demoAssets[id] : undefined;
@@ -93,6 +96,7 @@ const PropertyDetail = ({ onLogout }: { onLogout?: () => void }) => {
   const pin = record ? record.pin : "FL-DNA-7829-AX";
   const dnaDone = record ? record.dnaLocations.some((l) => l.applied) : demo!.dnaPlaced;
   const score = record ? record.score : demo!.registered ? (demo!.dnaPlaced ? 100 : 70) : 40;
+  const stolen = stolenState || isReportedStolen(pin);
 
   const steps: Step[] = record
     ? [
@@ -214,6 +218,23 @@ const PropertyDetail = ({ onLogout }: { onLogout?: () => void }) => {
               Complete Registration with Emily
             </button>
           </motion.div>
+        )}
+
+        {!isDraft && (
+          <div className="glass-card p-4 mt-4">
+            <div className="text-xs font-bold text-foreground mb-1">Item stolen?</div>
+            <p className="text-[10px] text-muted-foreground mb-3">Reporting alerts David, the law-enforcement AI investigator, statewide. Your name and phone stay hidden from officers.</p>
+            {stolen ? (
+              <div className="w-full px-4 py-3 rounded-lg bg-destructive/10 text-destructive font-semibold text-xs text-center">Reported stolen · David has been alerted</div>
+            ) : (
+              <button
+                onClick={() => { reportStolen({ pin, item: title, county: record?.county || "Orange County" }); setStolen(true); }}
+                className="w-full px-4 py-3 rounded-lg border border-destructive/40 text-destructive font-semibold text-xs hover:bg-destructive/5"
+              >
+                Report as stolen
+              </button>
+            )}
+          </div>
         )}
       </div>
     </DemoLayout>

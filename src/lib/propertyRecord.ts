@@ -1,3 +1,5 @@
+import { logEvent } from "./bridge";
+
 export interface DnaLocation {
   label: string;
   x: number;
@@ -36,8 +38,13 @@ export const loadRecords = (): PropertyRecord[] => {
 };
 
 export const saveRecord = (record: PropertyRecord) => {
+  const prev = loadRecords().find((r) => r.pin === record.pin);
   const all = loadRecords().filter((r) => r.pin !== record.pin);
   localStorage.setItem(KEY, JSON.stringify([record, ...all]));
+  // Tell the LE console (David) the moment a resident's item becomes protected.
+  if (record.status !== "draft" && prev?.status !== "protected") {
+    logEvent({ type: "registered", pin: record.pin, item: record.item, county: record.county });
+  }
 };
 
 export const findByPin = (pin: string): PropertyRecord | undefined =>
