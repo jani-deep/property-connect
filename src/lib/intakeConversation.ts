@@ -30,7 +30,7 @@ export function answerIntake(s: IntakeSession, question: IntakeQuestion, text: s
   const next = (q: IntakeQuestion, patch: Partial<IntakeSession> = {}, action?: string) => ({ patch: { ...patch, intakeQuestion: q }, next: q, action });
   if (question === "consent") {
     if (!/^(yes|i agree|i consent|agree)$/i.test(value)) throw new Error("Consent is required to continue. You can leave or pause if you do not consent.");
-    return next("verification", { consent: true }, "Participant consent recorded");
+    return s.verified ? next("narrative", { consent: true, status: "Started", step: 1, startedAt: s.startedAt ?? new Date().toISOString() }, "Participant consent recorded") : next("verification", { consent: true }, "Participant consent recorded");
   }
   if (question === "verification") {
     if (value !== s.agencyNumber) throw new Error("Please enter the agency number shown above exactly.");
@@ -38,7 +38,7 @@ export function answerIntake(s: IntakeSession, question: IntakeQuestion, text: s
   }
   if (question === "narrative") return next("location", { narrative: value }, "Participant completed incident step");
   if (question === "location") return next("incidentAt", { location: optional(value) });
-  if (question === "incidentAt") return next("property", { incidentAt: optional(value), step: 2 });
+  if (question === "incidentAt") return s.items.length ? next("more", { incidentAt: optional(value), step: 2 }, "Participant completed property step") : next("property", { incidentAt: optional(value), step: 2 });
   if (question === "property") return next("category", { items: [...s.items, { ...blankIntakeItem(), name: value }] }, "Participant added property details");
   const itemFields = ["category", "details", "identifier", "dnaPin", "value"] as const;
   const index = itemFields.findIndex((key) => key === question);
