@@ -170,7 +170,10 @@ const LeDavid = () => {
     setIntake(intakeRef.current);
     say(`I'll raise an owner-reveal ticket for **${c.item}** (${maskPin(c.pin)}). I need three details, one at a time.\n\n**1 of 3 · Reason for the match:** why are you checking this item? (for example: recovered at a pawn shop, traffic stop)`);
   };
-  const cases = Object.entries(stages).map(([pin, stage]) => ({ ...(registry.find((r) => r.pin === pin) ?? { pin, item: pin, county: "", serial: "", status: "" }), stage }));
+  // Side panel only shows items discussed in this chat session.
+  const chatText = messages.map((m) => m.text).join(" ").toUpperCase();
+  const chatPins = new Set(registry.filter((r) => chatText.includes(r.pin) || (r.serial && r.serial.length > 5 && chatText.includes(r.serial.toUpperCase()))).map((r) => r.pin));
+  const cases = Object.entries(stages).filter(([pin]) => chatPins.has(pin)).map(([pin, stage]) => ({ ...(registry.find((r) => r.pin === pin) ?? { pin, item: pin, county: "", serial: "", status: "" }), stage }));
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)] font-body">
@@ -224,7 +227,7 @@ const LeDavid = () => {
 
         <h2 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">Match to return</h2>
         <div className="mb-5 space-y-2">
-          {cases.length === 0 && <p className="rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">Ask David about a stolen item and a return case opens here. Cases are never created without an officer.</p>}
+          {cases.length === 0 && <p className="rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">Ask David about a stolen item and its return case shows here.</p>}
           {cases.map((c) => (
             <div key={c.pin} className="rounded-lg border border-border bg-card p-3">
               <div className="text-sm font-semibold leading-tight">{c.item}</div>
@@ -245,8 +248,8 @@ const LeDavid = () => {
 
         <h2 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground"><span className="h-2 w-2 animate-pulse rounded-full bg-success" /> Live from Emily</h2>
         <div className="space-y-2">
-          {events.length === 0 && <p className="rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">Register an item with Emily in the resident app, or report one stolen, and it appears here instantly.</p>}
-          {events.slice(0, 20).map((e) => { const m = eventMeta[e.type]; const Icon = m.icon; return (
+          {events.filter((e) => chatPins.has(e.pin)).length === 0 && <p className="rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">Updates from Emily for the items in this chat show here.</p>}
+          {events.filter((e) => chatPins.has(e.pin)).slice(0, 20).map((e) => { const m = eventMeta[e.type]; const Icon = m.icon; return (
             <div key={e.id} className="flex gap-2.5 rounded-lg border border-border bg-card p-2.5">
               <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${m.cls}`}><Icon className="h-3.5 w-3.5" /></div>
               <div className="min-w-0"><div className="truncate text-xs font-semibold">{e.item}</div><div className="text-[11px] text-muted-foreground">{m.label} · {new Date(e.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div></div>
