@@ -21,6 +21,8 @@ export interface IntakeSession {
 export const INTAKE_KEY = "propertyproof.david.intake.v1";
 export const INTAKE_CHANGE = "propertyproof-intake-change";
 export const loadIntakes = (): IntakeSession[] => { try { return JSON.parse(localStorage.getItem(INTAKE_KEY) || "[]"); } catch { return []; } };
+// Resident-origin reports enter the shared demo queue; invitations stay agency-scoped.
+export const visibleInDemoOperations = (s: IntakeSession, agency: string) => s.agency === agency || s.delivery === "Started from My Property";
 export const effectiveStatus = (s: IntakeSession, now = Date.now()): IntakeStatus =>
   !s.completedAt && !["Abandoned", "Rejected"].includes(s.status) && new Date(s.expiresAt).getTime() <= now ? "Expired" : s.status;
 export function saveIntake(session: IntakeSession) {
@@ -84,7 +86,7 @@ export function exportPackage(s: IntakeSession) {
   return JSON.stringify({ title: "PropertyProof Recovery Package", ...packageData, witnesses, evidence: s.evidence.map(({ url, ...e }) => { void url; return e; }),
     notice: "Participant-provided information; not an official police report. Agency review does not independently verify ownership." }, null, 2);
 }
-const esc = (v: unknown) => String(v ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
+const esc = (v: unknown) => String(v ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c] ?? c));
 export function exportReportHtml(s: IntakeSession) {
   const data = JSON.parse(exportPackage(s));
   const row = (k: string, v: unknown) => `<tr><th>${esc(k)}</th><td>${esc(v) || "Not supplied"}</td></tr>`;

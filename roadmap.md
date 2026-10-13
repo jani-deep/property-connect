@@ -1,5 +1,8 @@
 # Roadmap
 
+- [x] Make David intake a full-height Emily-style chat with an always-visible reply bar
+- [x] Verify My Property and agency-link items appear in David Operations with downloadable submitted reports
+
 - [x] Add David spoken replies and microphone answers matching Emily
 - [x] Verify voice controls and one-question-at-a-time answer flow
 
