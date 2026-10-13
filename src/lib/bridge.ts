@@ -36,3 +36,18 @@ export const setStage = (pin: string, item: string, county: string, stage: numbe
   if (stage === 3) write(STOLEN_KEY, loadStolen().filter((p) => p !== pin));
   logEvent({ type: STAGE_EVENT[stage], pin, item, county });
 };
+
+/** Finds the record a free-text message refers to: by PIN, serial, or most item-name words (min 2). */
+export const findRecordInText = <T extends { pin: string; item: string; serial?: string }>(text: string, records: T[]): T | undefined => {
+  const t = text.toLowerCase();
+  const direct = records.find((r) => t.includes(r.pin.toLowerCase()) || (r.serial && r.serial.length > 5 && t.includes(r.serial.toLowerCase())));
+  if (direct) return direct;
+  let best: T | undefined; let bestScore = 1;
+  for (const r of records) {
+    const words = r.item.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 2);
+    const score = words.filter((w) => t.includes(w)).length;
+    if (score > bestScore) { best = r; bestScore = score; }
+  }
+  return best;
+};
+export const STOLEN_INTENT = /\b(stolen|stole|theft|robbed|burglar|missing|taken)\b/i;
