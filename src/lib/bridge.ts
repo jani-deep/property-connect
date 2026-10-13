@@ -1,5 +1,6 @@
 /* Emily ↔ David bridge: shared registry, stolen reports and the match-to-return pipeline (demo, localStorage). */
 import type { PropertyRecord } from "./propertyRecord";
+import { recordTheft } from "./theftIncidents";
 
 export type BridgeEventType = "registered" | "stolen" | "match" | "reveal" | "approved" | "returned";
 export interface BridgeEvent { id: string; type: BridgeEventType; pin: string; item: string; county: string; at: string }
@@ -20,6 +21,7 @@ export const loadStolen = (): string[] => read<string[]>(STOLEN_KEY, []);
 export const isReportedStolen = (pin: string) => loadStolen().includes(pin);
 export const reportStolen = (r: Pick<PropertyRecord, "pin" | "item" | "county">) => {
   if (isReportedStolen(r.pin)) return;
+  recordTheft({ originalStatement: `Owner reported ${r.item} stolen`, items: [{ name: r.item, propertyPin: r.pin }] });
   write(STOLEN_KEY, [r.pin, ...loadStolen()]);
   // A new theft starts a fresh case, even if the item was returned before.
   const stages = loadStages(); if (r.pin in stages) { delete stages[r.pin]; write(STAGE_KEY, stages); }

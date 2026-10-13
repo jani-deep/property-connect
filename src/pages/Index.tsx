@@ -4,6 +4,7 @@ import { Shield, ArrowRight, Fingerprint, ChevronRight, Search, Building2 } from
 import MobileHeader from "@/components/MobileHeader";
 import emilyAvatar from "@/assets/emily-avatar.png";
 import BottomNav from "@/components/BottomNav";
+import { Button } from "@/components/ui/button";
 
 const pillars = [
   {
@@ -109,6 +110,10 @@ const Index = ({ onLogout }: { onLogout?: () => void }) => {
           </Link>
         </motion.div>
 
+        <section className="mb-6 flex items-center justify-between gap-3 border-y border-border py-5">
+          <div><h2 className="font-heading text-lg font-semibold">David · Stolen property</h2><p className="mt-1 text-xs text-muted-foreground">Agency intake & Recovery Packages</p></div>
+          <Button variant="outline" size="sm" asChild><Link to="/david">My reports <ArrowRight /></Link></Button>
+        </section>
         {/* Pillar Cards - stacked */}
         <div className="space-y-4 mb-8">
           {pillars.map((pillar, i) => (
