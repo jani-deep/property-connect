@@ -25,6 +25,11 @@ import LeApprovalDetail from "./pages/le/LeApprovalDetail";
 import LeVideos from "./pages/le/LeVideos";
 import LeProfile from "./pages/le/LeProfile";
 import LeDavid from "./pages/le/LeDavid";
+import LeIntakeSessions from "./pages/le/LeIntakeSessions";
+import LeIntakeDetail from "./pages/le/LeIntakeDetail";
+import IntakeSessionPage from "./pages/IntakeSession";
+import ResidentDavid from "./pages/ResidentDavid";
+import WitnessIntake from "./pages/WitnessIntake";
 
 import LePanelLayout from "./components/LePanelLayout";
 
@@ -43,7 +48,9 @@ const LePanel = () => {
         <Route path="/audit" element={<LeAudit />} />
         <Route path="/approvals" element={<LeApprovals />} />
         <Route path="/approvals/:id" element={<LeApprovalDetail />} />
-        <Route path="/david" element={<LeDavid />} />
+        <Route path="/david" element={<LeIntakeSessions />} />
+        <Route path="/david/search" element={<LeDavid />} />
+        <Route path="/david/sessions/:id" element={<LeIntakeDetail />} />
         <Route path="/videos" element={<LeVideos />} />
         <Route path="/profile" element={<LeProfile />} />
 
@@ -63,6 +70,7 @@ const ResidentApp = () => {
     <Routes>
       <Route path="/" element={<Index onLogout={handleLogout} />} />
       <Route path="/emily" element={<Emily onLogout={handleLogout} />} />
+      <Route path="/david" element={<ResidentDavid onLogout={handleLogout} />} />
       <Route path="/property-proof" element={<PropertyProof onLogout={handleLogout} />} />
       <Route path="/property/:id" element={<PropertyDetail onLogout={handleLogout} />} />
       <Route path="/law-enforcement" element={<LawEnforcement onLogout={handleLogout} />} />
@@ -81,6 +89,8 @@ const App = () => (
         <Routes>
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/intake/:token" element={<IntakeSessionPage />} />
+          <Route path="/witness/:token" element={<WitnessIntake />} />
           <Route path="/le/*" element={<LePanel />} />
           <Route path="/*" element={<ResidentApp />} />
         </Routes>

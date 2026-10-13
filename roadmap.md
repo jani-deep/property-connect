@@ -1,5 +1,14 @@
 # Roadmap
 
+- [x] Add David agency session dashboard and creation/delivery demo
+- [x] Add resident consent, verification, guided intake, evidence and attestation
+- [x] Add Recovery Package correction/review and metrics
+- [x] Test the agency-to-resident-to-review flow
+- [x] Preserve original property and victim statements; link theft incidents and versioned corrections
+- [x] Add independent witness invitation demo pages without victim information in the witness view
+- [x] Add two-way David investigation, fictional evidence, description-based identification/enrichment and package attestation
+- [x] Verify demo signed-in entry and no-app intake; disclose browser-local delivery/security limitations
+
 - [x] LE Console 2.0 per scope: email login, registration, pending review, forgot password
 - [x] Dashboard greeting, image/identifier search buttons, quick search
 - [x] Manual PIN/Serial/VIN/barcode search with limited summary and governed reveal

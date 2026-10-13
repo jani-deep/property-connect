@@ -9,7 +9,7 @@ const links = [
   { to: "/le/search", label: "Scan & Search", icon: ScanLine },
   { to: "/le/manual", label: "Manual Search", icon: KeyRound },
   { to: "/le/history", label: "Search History", icon: History },
-  { to: "/le/david", label: "David AI Investigator", icon: Bot },
+  { to: "/le/david", label: "David Operations", icon: Bot },
   { to: "/le/approvals", label: "Approval Queue", icon: ClipboardCheck },
   { to: "/le/audit", label: "Audit & Team", icon: ScrollText },
   { to: "/le/videos", label: "Videos", icon: PlayCircle, Bot },
