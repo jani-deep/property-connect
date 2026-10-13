@@ -30,5 +30,7 @@ const STAGE_EVENT: BridgeEventType[] = ["match", "reveal", "approved", "returned
 export const loadStages = (): Record<string, number> => read<Record<string, number>>(STAGE_KEY, {});
 export const setStage = (pin: string, item: string, county: string, stage: number) => {
   write(STAGE_KEY, { ...loadStages(), [pin]: stage });
+  // Item handed back: clear the theft report so the resident sees it as protected again.
+  if (stage === 3) write(STOLEN_KEY, loadStolen().filter((p) => p !== pin));
   logEvent({ type: STAGE_EVENT[stage], pin, item, county });
 };

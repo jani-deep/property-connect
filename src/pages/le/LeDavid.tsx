@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, Bot, Check, ImagePlus, Loader2, Mic, MicOff, RotateCcw, Send, ShieldCheck, User, UserPlus, Volume2, VolumeX, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { addAudit, leRecords } from "@/lib/leData";
+import { addApproval, addAudit, leRecords } from "@/lib/leData";
+import { Link } from "react-router-dom";
 import { loadRecords } from "@/lib/propertyRecord";
 import { BRIDGE_CHANGE, loadEvents, loadStages, loadStolen, RETURN_STAGES, setStage, type BridgeEvent } from "@/lib/bridge";
 import { maskPin } from "@/lib/mask";
@@ -131,6 +132,16 @@ const LeDavid = () => {
     { label: "Recovered", value: registry.filter((r) => r.status === "Recovered").length + Object.values(stages).filter((s) => s === 3).length, cls: "text-success" },
     { label: "Pending reveals", value: Object.values(stages).filter((s) => s === 1).length, cls: "text-warning" },
   ];
+  const [revealFor, setRevealFor] = useState<string | null>(null);
+  const [reason, setReason] = useState(""); const [caseNo, setCaseNo] = useState("");
+  const ownerOf = (pin: string) => { const r = loadRecords().find((x) => x.pin === pin) ?? leRecords.find((x) => x.pin === pin); return r ? { owner: r.owner, phone: r.phone, category: r.category } : undefined; };
+  const requestReveal = (c: { pin: string; item: string; county: string }) => {
+    if (!reason.trim() || !caseNo.trim()) return;
+    addApproval({ item: c.item, pin: c.pin, category: ownerOf(c.pin)?.category ?? "Property", reason: reason.trim(), caseNo: caseNo.trim(), county: c.county });
+    setStage(c.pin, c.item, c.county, 1);
+    addAudit({ action: "Owner reveal requested", reason: reason.trim(), caseNo: caseNo.trim(), data: c.pin });
+    setRevealFor(null); setReason(""); setCaseNo("");
+  };
   const cases = Object.entries(stages).map(([pin, stage]) => ({ ...(registry.find((r) => r.pin === pin) ?? { pin, item: pin, county: "", serial: "", status: "" }), stage }));
 
   return (
@@ -191,10 +202,21 @@ const LeDavid = () => {
               <div className="text-sm font-semibold leading-tight">{c.item}</div>
               <div className="mb-2 font-mono text-[11px] text-muted-foreground">{maskPin(c.pin)} · {c.county}</div>
               <div className="mb-2 flex gap-1">{RETURN_STAGES.map((_, i) => <div key={i} className={`h-1.5 flex-1 rounded-full ${i <= c.stage ? "bg-primary" : "bg-muted"}`} />)}</div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-medium">{RETURN_STAGES[c.stage]}</span>
-                {c.stage < 3 && <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => { setStage(c.pin, c.item, c.county, c.stage + 1); addAudit({ action: RETURN_STAGES[c.stage + 1], reason: "Recovered property return", caseNo: "—", data: c.pin }); }}>Next: {RETURN_STAGES[c.stage + 1]}</Button>}
-              </div>
+              <div className="mb-2 text-xs font-medium">{RETURN_STAGES[c.stage]}</div>
+              {c.stage === 0 && (revealFor === c.pin ? (
+                <div className="space-y-1.5">
+                  <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason for reveal" className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs" />
+                  <input value={caseNo} onChange={(e) => setCaseNo(e.target.value)} placeholder="Case number" className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs" />
+                  <div className="flex gap-1.5"><Button size="sm" variant="ghost" className="h-7 flex-1 text-xs" onClick={() => setRevealFor(null)}>Cancel</Button><Button size="sm" className="h-7 flex-1 text-xs" disabled={!reason.trim() || !caseNo.trim()} onClick={() => requestReveal(c)}>Send for approval</Button></div>
+                </div>
+              ) : <Button size="sm" variant="outline" className="h-7 w-full text-xs" onClick={() => setRevealFor(c.pin)}>Request owner reveal</Button>)}
+              {c.stage === 1 && <p className="rounded-md bg-warning/10 px-2 py-1.5 text-[11px] text-warning">Waiting for supervisor in <Link to="/le/approvals" className="font-semibold underline">Approval Queue</Link></p>}
+              {c.stage === 2 && (() => { const o = ownerOf(c.pin); return (
+                <div className="space-y-2">
+                  <div className="rounded-md bg-success/10 p-2 text-xs"><div className="text-[10px] font-semibold uppercase text-success">Owner (approved reveal)</div><div className="font-semibold">{o?.owner || "Owner on file"}</div><div className="font-mono">{o?.phone || "—"}</div></div>
+                  <Button size="sm" className="h-7 w-full text-xs" onClick={() => { setStage(c.pin, c.item, c.county, 3); addAudit({ action: "Returned to owner", reason: "Recovered property return", caseNo: "—", data: c.pin }); }}>Mark returned to owner</Button>
+                </div>); })()}
+              {c.stage === 3 && <p className="text-[11px] text-success">Back with owner · shows as protected in their app</p>}
             </div>
           ))}
         </div>

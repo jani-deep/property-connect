@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LePage, Card } from "@/components/le/LePage";
+import { loadStages, setStage } from "@/lib/bridge";
 import { addAudit, loadApprovals, saveApprovals, statusBadge } from "@/lib/leData";
 
 const LeApprovals = () => {
@@ -10,6 +11,8 @@ const LeApprovals = () => {
     const next = list.map((r) => (r.id === id ? { ...r, status } : r));
     setList(next); saveApprovals(next);
     const r = list.find((x) => x.id === id)!;
+    // Requests raised from David move the return case forward (or back) automatically.
+    if (loadStages()[r.pin] === 1) setStage(r.pin, r.item, r.county ?? "", status === "Approved" ? 2 : 0);
     addAudit({ action: `Reveal ${status.toLowerCase()}`, reason: r.reason, caseNo: r.caseNo, data: `${r.item} owner record` });
   };
   return (
